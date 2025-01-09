@@ -91,9 +91,9 @@ class Roosterdata:
                 naam=dataframe_vakken["Vak"][i],
                 aantal_hoorcolleges=dataframe_vakken["#Hoorcolleges"][i],
                 aantal_werkcolleges=dataframe_vakken["#Werkcolleges"][i],
-                maximumaantal_studenten=dataframe_vakken["Max. stud. Werkcollege"][i],
+                aantal_studenten_per_werkcollege=dataframe_vakken["Max. stud. Werkcollege"][i],
                 aantal_practica=dataframe_vakken["#Practica"][i],
-                aantal_studenten_per_werkcollege=dataframe_vakken["Max. stud. Practicum"][i],
+                aantal_studenten_per_practicum=dataframe_vakken["Max. stud. Practicum"][i],
                 verwacht_aantal_student=dataframe_vakken["Verwacht"][i],
             )
             for i in range(dataframe_vakken.__len__())
@@ -160,3 +160,6 @@ class Roosterdata:
         self.STUDENTEN = self._lees_student_vakdata()
 
         self._update_studentaantallen_vak()
+
+        for vak in self.VAKKEN:
+            vak.bereken_aantal_studenten_per_werkcollege()

@@ -4,12 +4,13 @@ from typing import Final, Literal
 
 class Maxima:
     __slots__: tuple[str, ...] = (
-        "AANTAL_TIJDSLOTEN_WEEK", "AANTAL_WEKEN_JAAR", "AANTAL_WERKCOLLEGES_TEGELIJKERTIJD_PER_VAK"
+        "AANTAL_TIJDSLOTEN_WEEK", "AANTAL_WEKEN_JAAR", "AANTAL_WERKCOLLEGES_TEGELIJKERTIJD_PER_VAK", "GROOTSTE_ZAAL"
     )
 
     def __init__(self) -> None:
         self.AANTAL_TIJDSLOTEN_WEEK: Final[int] = 20  # 5 dagen per week, vier tijdsloten per dag
         self.AANTAL_WEKEN_JAAR: Final[int] = 52  # 5 dagen per week, vier tijdsloten per dag
+        self.GROOTSTE_ZAAL: Final[str] = "C0.110"
 
 
 class Tekst:

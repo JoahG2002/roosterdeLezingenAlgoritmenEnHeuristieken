@@ -10,17 +10,20 @@ from .zaal import Zaal, Zaalslot
 from .vakactiviteit import Vakactiviteit
 from ..dataverwerking.lees import Roosterdata
 from ..dataverwerking.schrijf import schrijf_foutmelding
-from ..constants.constant import returncodes, tijdeenheden, teksten
+from ..constants.constant import returncodes, tijdeenheden, teksten, maxima
 
 
 class Roostermaker:
-    __slots__: tuple[str, ...] = ("zalen", "vakken", "TIJDSLOTEN", "rooster", "pad_resultaten_csv", "studenten")
+    __slots__: tuple[str, ...] = (
+        "__zalen", "__vakken", "TIJDSLOTEN", "__rooster", "__pad_resultaten_csv", "__studenten", "__strafpunten",
+        "__grootste_zaal_gebruikt", "__aantal_gebruikte_zalen"
+    )
 
     def __init__(self, roosterdata: Roosterdata) -> None:
-        self.zalen: tuple[Zaal, ...] = roosterdata.ZALEN
-        self.vakken: tuple[Vak, ...] = roosterdata.VAKKEN
-        self.studenten: tuple[Student, ...] = roosterdata.STUDENTEN
-        self.pad_resultaten_csv: str = roosterdata.PAD_CSV_RESULTATEN
+        self.__zalen: tuple[Zaal, ...] = self._sorteer_zalen(roosterdata.ZALEN)
+        self.__vakken: tuple[Vak, ...] = roosterdata.VAKKEN
+        self.__studenten: tuple[Student, ...] = roosterdata.STUDENTEN
+        self.__pad_resultaten_csv: str = roosterdata.PAD_CSV_RESULTATEN
 
         self.TIJDSLOTEN: Final[tuple[Tijdslot, ...]] = (
             Tijdslot(weekdag="maandag", tijdstip="9.00–11.00"), Tijdslot(weekdag="maandag", tijdstip="11.00–13.00"),
@@ -32,16 +35,37 @@ class Roostermaker:
             Tijdslot(weekdag="donderdag", tijdstip="9.00–11.00"), Tijdslot(weekdag="donderdag", tijdstip="11.00–13.00"),
             Tijdslot(weekdag="donderdag", tijdstip="13.00–15.00"), Tijdslot(weekdag="donderdag", tijdstip="15.00–17.00"),
             Tijdslot(weekdag="vrijdag", tijdstip="9.00–11.00"), Tijdslot(weekdag="vrijdag", tijdstip="11.00–13.00"),
-            Tijdslot(weekdag="vrijdag", tijdstip="13.00–15.00"), Tijdslot(weekdag="vrijdag", tijdstip="15.00–17.00")
+            Tijdslot(weekdag="vrijdag", tijdstip="13.00–15.00"), Tijdslot(weekdag="vrijdag", tijdstip="15.00–17.00"),
+            Tijdslot(weekdag="vrijdag", tijdstip="17.00–19.00")
         )
 
-        self.rooster: dict[Zaalslot, Vakactiviteit] = {}
+        self.__rooster: dict[Zaalslot, Vakactiviteit] = {}
+        self.__aantal_gebruikte_zalen: int = 0
+        self.__strafpunten: int = 0
+        self.__grootste_zaal_gebruikt: bool = False
 
-    def is_vrij(self, zaalslot: Zaalslot) -> bool:
+    def _sorteer_zalen(self, zalen: tuple[Zaal, ...]) -> tuple[Zaal, ...]:
+        """
+        Sorteert de zalen van groot naar klein — zodat de grote zalen eerder gebruikt kunnen worden voor de hoorcolleges.
+        """
+        zaalnamen_met_grootten: dict[str, int] = {zaal.naam: zaal.capaciteit for zaal in self.__zalen}
+        zalen_gesorteerd: list[tuple[str, int]] = sorted(zaalnamen_met_grootten.items(), key=lambda x: x[1])
+        
+        zalen_gesorteerd_: list[Zaal | None] = [None] * zalen.__len__()
+
+        for i, zaalnaam_met_grootte in enumerate(zalen_gesorteerd):
+            for zaal in self.__zalen:
+                if zaal.naam == zaalnaam_met_grootte[0]:
+                    zalen_gesorteerd_[i] = zaal
+                    break
+
+        return tuple(zalen_gesorteerd_)
+
+    def _is_vrij(self, zaalslot: Zaalslot) -> bool:
         """
         Geeft terug of een tijd-zaalcombinaties (zaalslot) vrij is — of er nog geen vakactiviteit is ingeroosterd voor een bepaalde zaal op een gegeven tijdstip.
         """
-        return zaalslot not in self.rooster
+        return zaalslot not in self.__rooster
 
     @staticmethod
     def _kan_faciliteren(zaal: Zaal, vakactiviteit: Vakactiviteit) -> bool:
@@ -51,38 +75,71 @@ class Roostermaker:
         if vakactiviteit.type == "hoorcollege":
             return zaal.capaciteit >= vakactiviteit.vak.aantal_studenten()
 
-        if vakactiviteit.vak.aantal_studenten_per_werkcollege:
-            return zaal.capaciteit >= vakactiviteit.vak.aantal_studenten_per_werkcollege
+        voor_werkcollege: bool = True if (vakactiviteit.type == "werkcollege") else False
 
-        return True
+        return zaal.capaciteit >= vakactiviteit.vak.geef_aantal_studenten_per_niet_hoorcollege(voor_werkcollege)
 
     def _voeg_activiteit_toe_aan_rooster_studenten(self, zaalslot: Zaalslot, vakactiviteit: Vakactiviteit) -> None:
         """
         Voegt een ingeroosterde vakactiviteit toe aan de persoonlijke roosters van iedere student die het vak van de activiteit volgt.
         """
-        for student in self.studenten:
+        for student in self.__studenten:
             if not student.volgt_vak(vakactiviteit.vak.naam):
                 continue
 
             student.voeg_activiteit_toe_aan_rooster(zaalslot, vakactiviteit)
 
+    def _gebruik_grote_zaal(self, zaalslot: Zaalslot, vakactiviteit: Vakactiviteit) -> None:
+        """
+        Gebruikt de grote zaal voor een vakactiviteit.
+        """
+        self.__rooster[zaalslot] = vakactiviteit
+
+        self._voeg_activiteit_toe_aan_rooster_studenten(zaalslot, vakactiviteit)
+
+        self.__grootste_zaal_gebruikt = True
+
+        self.__aantal_gebruikte_zalen += 1
+        self.__strafpunten += 5
+
+    def _is_laatste_zaal(self) -> bool:
+        """
+        Geeft terug of de laatste zaal aan bod is.
+        """
+        return self.__aantal_gebruikte_zalen == (len(self.__zalen) - 1)
+
     def rooster_activiteit_in(self, vakactiviteit: Vakactiviteit) -> Literal[0, -1]:
         """
         Poogt een activiteit in te roosteren, en geeft met een returncode terug of dit is gelukt.
         """
+        ongebruikte_zaalsloten: set[Zaalslot] = set()
+
         for tijdslot in self.TIJDSLOTEN:
-            for zaal in self.zalen:
+            for zaal in self.__zalen:
                 zaalslot: Zaalslot = Zaalslot(tijdslot, zaal)
 
-                if not self.is_vrij(zaalslot):
-                    continue
+                if zaalslot.tijdslot.tijdstip.startswith("17"):
+                    if self._is_laatste_zaal() and not self.__grootste_zaal_gebruikt:
+                        pass
+
+                if not self._is_vrij(zaalslot):
+                    if (zaalslot.zaal.naam == maxima.GROOTSTE_ZAAL) and not self.__grootste_zaal_gebruikt:
+                        self._gebruik_grote_zaal(zaalslot, vakactiviteit)
+
+                        continue
+
+                    if not self.__grootste_zaal_gebruikt and self._is_laatste_zaal():
+                        self._gebruik_grote_zaal(zaalslot, vakactiviteit)
+
+                        continue
 
                 if not self._kan_faciliteren(zaal, vakactiviteit):
-                    continue
+                    self.__strafpunten += 1
 
-                self.rooster[zaalslot] = vakactiviteit
-
+                self.__rooster[zaalslot] = vakactiviteit
                 self._voeg_activiteit_toe_aan_rooster_studenten(zaalslot, vakactiviteit)
+
+                self.__aantal_gebruikte_zalen += 1
 
                 return returncodes.SUCCES
 
@@ -92,7 +149,7 @@ class Roostermaker:
         """
         Genereert een rooster voor een gegeven tuple vakactiviteiten.
         """
-        for vak in self.vakken:
+        for vak in self.__vakken:
             for _ in range(vak.aantal_hoorcolleges):
                 if self.rooster_activiteit_in(Vakactiviteit(vak, "hoorcollege")) == returncodes.MISLUKT:
                     schrijf_foutmelding(f"het is niet gelukt een hoorcollegetijdslot te vinden voor {vak.naam}!")
@@ -105,19 +162,19 @@ class Roostermaker:
                 if self.rooster_activiteit_in(Vakactiviteit(vak, "practicum")) == returncodes.MISLUKT:
                     schrijf_foutmelding(f"het is niet gelukt een practicumtijdslot te vinden voor {vak.naam}!")
 
-        return self.rooster
+        return self.__rooster
 
     def print_rooster(self) -> None:
         """
         Print het rooster naar de stdout (de standaarduitvoerstroom).
         """
-        if not self.rooster:
+        if not self.__rooster:
             raise ValueError("Geen rooster is not gegenereerd; printen onmogelijk.")
 
         for dag in tijdeenheden.WEEKDAGEN:
             sys.stdout.write(f"\n{dag.upper()}\n{'-' * 110}\n")
 
-            for zaalslot, vakactiviteit in self.rooster.items():
+            for zaalslot, vakactiviteit in self.__rooster.items():
                 if zaalslot.tijdslot.weekdag == dag:
                     sys.stdout.write(
                         f"- {Fore.BLUE}{zaalslot.zaal.naam}: {Fore.MAGENTA}{vakactiviteit.vak.naam} "
@@ -151,20 +208,26 @@ class Roostermaker:
         """
         Print het rooster van iedere student.
         """
-        for student in self.studenten:
+        for student in self.__studenten:
             self.print_rooster_student(student)
+
+    def bereken_strafpunten(self) -> int:
+        """
+        Berekent het aantal strafpunten van de huidige roosterconfiguratie.
+        """
+        ...
 
     def naar_csv(self) -> None:
         """
         Schrijft de data van het genereerde rooster naar een csv-bestand.
         """
-        if not self.rooster:
+        if not self.__rooster:
             raise ValueError("Geen rooster is not gegenereerd; schrijven naar csv-bestand onmogelijk.")
 
-        with open(self.pad_resultaten_csv, 'w', encoding="utf-8") as csv_bestand:
+        with open(self.__pad_resultaten_csv, 'w', encoding="utf-8") as csv_bestand:
             csv_bestand.write(teksten.KOLOMMEN_RESULTATEN_CSV)
 
-            for student in self.studenten:
+            for student in self.__studenten:
                 vakken_met_huidig_werkcollege: dict[str, dict[str, int]] = {
                     naam_vak: {"practicum": 0, "hoorcollege": 0, "werkcollege": 0} for naam_vak in student.vaknamen
                 }
