@@ -7,4 +7,8 @@
 - processen, threads?
 - .so od .dll's?
 
-python3.12 main.py --vakken ./data/vakken.csv --zalen ./data/zalen.csv --sv ./data/studenten_en_vakken.csv
+sommige vakken hebben geen maximumaantal leerlingen, wel verwacht
+
+python3.12 main.py --vakken ./data/vakken.csv --zalen ./data/zalen.csv --sv ./data/studenten_en_vakken.csv --resultaat ./data/resultaatAlgoritme1.csv
+
+geem werlcollege op dezelfde dag

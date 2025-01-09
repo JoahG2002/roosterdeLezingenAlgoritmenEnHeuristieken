@@ -1,5 +1,4 @@
 import os
-import sys
 
 from threading import Thread
 from polars import read_csv, DataFrame
@@ -12,18 +11,18 @@ from ..modellen.student import Student
 class Roosterdata:
     __slots__: tuple[str, ...] = (
         "__PAD_VAKDATA_CSV", "__PAD_ZAALDATA_CSV", "__PAD_STUDENT_VAKKENDATA_CSV", "VAKKEN", "ZALEN",
-        "__student_vakdata_ingelezen"
+        "__student_vakdata_ingelezen", "PAD_CSV_RESULTATEN", "STUDENTEN", "NAAM_NAAR_VAK"
     )
 
     def __init__(self, argv: list[str]) -> None:
         self.__PAD_VAKDATA_CSV: str = ''
         self.__PAD_ZAALDATA_CSV: str = ''
         self.__PAD_STUDENT_VAKKENDATA_CSV: str = ''
+        self.PAD_CSV_RESULTATEN: str = ''
 
         self.VAKKEN: tuple[Vak, ...] | None = None
         self.ZALEN: tuple[Zaal, ...] | None = None
-
-        self.__student_vakdata_ingelezen: tuple[Vak, ...] | None = None
+        self.STUDENTEN: tuple[Student, ...] | None = None
 
         self._vind_csv_paden(argv)
         self._lees_roosterdata()
@@ -53,13 +52,18 @@ class Roosterdata:
                 i += 2
                 continue
 
+            if argv[i] == "--resultaat":
+                self.PAD_CSV_RESULTATEN = argv[i + 1].strip()
+
+                i += 2
+
             i += 1
 
     def inlezen_geslaagd(self) -> bool:
         """
         Geeft terug of het inlezen van alle csv-databestanden is geslaagd.
         """
-        return bool(self.VAKKEN and self.ZALEN and self.__student_vakdata_ingelezen)
+        return bool(self.VAKKEN and self.ZALEN and self.STUDENTEN)
 
     def _alle_csv_bestanden_bestaan(self) -> bool:
         """
@@ -115,24 +119,27 @@ class Roosterdata:
         return tuple(
             Student(
                 studentnummer=dataframe_student_vakdata["Stud.Nr."][i],
-                vaknamen=tuple(
-                    dataframe_student_vakdata[f"Vak{j}"][i] for j in range(1, 6) if dataframe_student_vakdata[f"Vak{j}"][i]
-                )
+                voornaam=dataframe_student_vakdata["Voornaam"][i],
+                achternaam=dataframe_student_vakdata["Achternaam"][i],
+                vaknamen={
+                    dataframe_student_vakdata[f"Vak{j}"][i]
+                    for j in range(1, 6) if dataframe_student_vakdata[f"Vak{j}"][i]
+                }
             )
             for i in range(dataframe_student_vakdata.__len__())
         )
 
-    def _update_studentaantallen_vak(self, studenten: tuple[Student, ...]) -> None:
+    def _update_studentaantallen_vak(self) -> None:
         """
         Updatet het aantal student dat daadwerkelijk ieder vak volgt.
         """
-        for student in studenten:
+        for student in self.STUDENTEN:
             for vak_student in student.vaknamen:
                 for vak in self.VAKKEN:
                     if not (vak_student == vak.naam):
                         continue
 
-                    vak.voeg_student_toe(student)
+                    vak.voeg_student_toe(student.studentnummer)
 
     def _lees_roosterdata(self) -> None:
         """
@@ -150,5 +157,6 @@ class Roosterdata:
         proces1.join()
         proces2.join()
 
-        studenten: tuple[Student, ...] = self._lees_student_vakdata()
-        self._update_studentaantallen_vak(studenten)
+        self.STUDENTEN = self._lees_student_vakdata()
+
+        self._update_studentaantallen_vak()

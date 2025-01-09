@@ -1,7 +1,5 @@
 import sys
 
-from rooster.modellen.vak import Vak
-from rooster.modellen.zaal import Zaal
 from rooster.modellen.genereer import Roostermaker
 from rooster.dataverwerking.lees import Roosterdata
 from rooster.dataverwerking.schrijf import schrijf_foutmelding
@@ -9,8 +7,8 @@ from rooster.constants.constant import returncodes, teksten
 
 
 def main(argc: int, argv: list[str]) -> None:
-    if not argc == 7:
-        schrijf_foutmelding(teksten.TOELICHTING_VLAGGEN)
+    if not (argc == 9):
+        schrijf_foutmelding(teksten.TOELICHTING_TEKORT_VLAGGEN)
         exit(returncodes.MISLUKT)
 
     roosterdata: Roosterdata = Roosterdata(argv)
@@ -20,9 +18,10 @@ def main(argc: int, argv: list[str]) -> None:
         exit(returncodes.MISLUKT)
 
     roostermaker: Roostermaker = Roostermaker(roosterdata)
-    roostermaker.genereer_rooster()
 
-    roostermaker.print_rooster()
+    roostermaker.genereer_rooster()
+    roostermaker.print_alle_studentroosters()
+    roostermaker.naar_csv()
 
     exit(returncodes.SUCCES)
 

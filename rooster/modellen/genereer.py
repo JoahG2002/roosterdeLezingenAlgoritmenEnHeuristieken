@@ -4,20 +4,23 @@ from colorama import Fore, Style
 from typing import Literal, Final
 
 from .vak import Vak
+from .student import Student
 from .tijdslot import Tijdslot
 from .zaal import Zaal, Zaalslot
 from .vakactiviteit import Vakactiviteit
 from ..dataverwerking.lees import Roosterdata
 from ..dataverwerking.schrijf import schrijf_foutmelding
-from ..constants.constant import returncodes, tijdeenheden
+from ..constants.constant import returncodes, tijdeenheden, teksten
 
 
 class Roostermaker:
-    __slots__: tuple[str, ...] = ("zalen", "vakken", "TIJDSLOTEN", "rooster")
+    __slots__: tuple[str, ...] = ("zalen", "vakken", "TIJDSLOTEN", "rooster", "pad_resultaten_csv", "studenten")
 
     def __init__(self, roosterdata: Roosterdata) -> None:
         self.zalen: tuple[Zaal, ...] = roosterdata.ZALEN
         self.vakken: tuple[Vak, ...] = roosterdata.VAKKEN
+        self.studenten: tuple[Student, ...] = roosterdata.STUDENTEN
+        self.pad_resultaten_csv: str = roosterdata.PAD_CSV_RESULTATEN
 
         self.TIJDSLOTEN: Final[tuple[Tijdslot, ...]] = (
             Tijdslot(weekdag="maandag", tijdstip="9.00–11.00"), Tijdslot(weekdag="maandag", tijdstip="11.00–13.00"),
@@ -46,9 +49,22 @@ class Roostermaker:
         Geeft terug of een zaal een bepaalde vakactiviteit kan faciliteren — of de zaal genoeg zitplaatsen heeft voor het vereiste aantal studenten.
         """
         if vakactiviteit.type == "hoorcollege":
-            return zaal.capaciteit >= vakactiviteit.vak.maximumaantal_studenten
+            return zaal.capaciteit >= vakactiviteit.vak.aantal_studenten()
 
-        return zaal.capaciteit >= vakactiviteit.vak.aantal_studenten_per_werkcollege
+        if vakactiviteit.vak.aantal_studenten_per_werkcollege:
+            return zaal.capaciteit >= vakactiviteit.vak.aantal_studenten_per_werkcollege
+
+        return True
+
+    def _voeg_activiteit_toe_aan_rooster_studenten(self, zaalslot: Zaalslot, vakactiviteit: Vakactiviteit) -> None:
+        """
+        Voegt een ingeroosterde vakactiviteit toe aan de persoonlijke roosters van iedere student die het vak van de activiteit volgt.
+        """
+        for student in self.studenten:
+            if not student.volgt_vak(vakactiviteit.vak.naam):
+                continue
+
+            student.voeg_activiteit_toe_aan_rooster(zaalslot, vakactiviteit)
 
     def rooster_activiteit_in(self, vakactiviteit: Vakactiviteit) -> Literal[0, -1]:
         """
@@ -65,6 +81,8 @@ class Roostermaker:
                     continue
 
                 self.rooster[zaalslot] = vakactiviteit
+
+                self._voeg_activiteit_toe_aan_rooster_studenten(zaalslot, vakactiviteit)
 
                 return returncodes.SUCCES
 
@@ -106,10 +124,56 @@ class Roostermaker:
                         f"{Fore.YELLOW}({vakactiviteit.type}){Style.RESET_ALL}\n"
                     )
 
-    def naar_csv(self, pad_csv_bestand: str) -> None:
+    @staticmethod
+    def print_rooster_student(student: Student) -> None:
+        """
+        Print het persoonlijke rooster van een student naar de stdout (de standaarduitvoerstroom).
+        """
+        if not student.rooster:
+            raise ValueError("Geen rooster is not gegenereerd voor deze student; printen onmogelijk.")
+
+        sys.stdout.write(
+            f"ROOSTER {Fore.GREEN}{student.volledige_naam}{Fore.MAGENTA}"
+            f" ({student.studentnummer}){Style.RESET_ALL}\n{'-' * 85}\n"
+        )
+
+        for dag in tijdeenheden.WEEKDAGEN:
+            sys.stdout.write(f"\n{dag.upper()}\n{'-' * 110}\n")
+
+            for zaalslot, vakactiviteit in student.rooster.items():
+                if zaalslot.tijdslot.weekdag == dag:
+                    sys.stdout.write(
+                        f"- {Fore.BLUE}{zaalslot.zaal.naam}: {Fore.MAGENTA}{vakactiviteit.vak.naam} "
+                        f"{Fore.YELLOW}({vakactiviteit.type}){Style.RESET_ALL}\n"
+                    )
+
+    def print_alle_studentroosters(self) -> None:
+        """
+        Print het rooster van iedere student.
+        """
+        for student in self.studenten:
+            self.print_rooster_student(student)
+
+    def naar_csv(self) -> None:
         """
         Schrijft de data van het genereerde rooster naar een csv-bestand.
         """
         if not self.rooster:
             raise ValueError("Geen rooster is not gegenereerd; schrijven naar csv-bestand onmogelijk.")
 
+        with open(self.pad_resultaten_csv, 'w', encoding="utf-8") as csv_bestand:
+            csv_bestand.write(teksten.KOLOMMEN_RESULTATEN_CSV)
+
+            for student in self.studenten:
+                vakken_met_huidig_werkcollege: dict[str, dict[str, int]] = {
+                    naam_vak: {"practicum": 0, "hoorcollege": 0, "werkcollege": 0} for naam_vak in student.vaknamen
+                }
+
+                for zaalslot, activiteit in student.rooster.items():
+                    vakken_met_huidig_werkcollege[activiteit.vak.naam][activiteit.type] += 1
+
+                    csv_bestand.write(
+                        f"{student.volledige_naam},{activiteit.vak.naam},"
+                        f"{activiteit.type}{vakken_met_huidig_werkcollege[activiteit.vak.naam][activiteit.type]},"
+                        f"{zaalslot.zaal.naam},{zaalslot.tijdslot.weekdag},{zaalslot.tijdslot.tijdstip} uur\n"
+                    )
