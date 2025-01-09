@@ -1,0 +1,203 @@
+VRAAG 1
+
+Een student heeft 12 verschillende vakken van 2 uur welke geroosterd moeten worden van maandag t/m vrijdag in tijdsloten 9-11, 11-13, 13-15, 15-17. Hoeveel verschillende roosters zijn er mogelijk voor deze student zonder overlap van vakken?
+
+Volgorde is van belang omdat ieder vak maar éénmaal gekozen mag worden. Daarbij is herhaling geen optie.
+
+5 dagen * 4 lesblokken = 20 lesblokken
+12 vakken, dus 12 plaatsen op 20 mogelijke positities, lesblokken.
+
+P(20, 12) = 20! / (20 - 12)! = 20! / 8! = 670.442.572.800.
+
+------------------------------------------------------------------------------------------------------
+VRAAG 2
+
+Je fietst door Manhattan, New York en kunt bij elk kruispunt linksaf, rechtsaf of rechtdoor. Hoeveel verschillende routes kun je rijden vanaf een gegeven beginpunt en richting met daarin 20 kruispunten?
+
+Volgorde is belangrijk omdat iedere beslissing op een gegeven kruispunt de beslissing op volgende bepaald. Herhaling is mogelijk: een route als rechts, rechts, links, rechts, rechtdoor kan gelopen worden zonder problemen. Het is zelfs mogelijk een eindeloze route lopen door viermaal rechts of viermaal links te lopen.
+
+20 kruispunten en steeds 3 opties.
+
+3^20 = 3.486.784.401 mogelijk routes.
+
+------------------------------------------------------------------------------------------------------
+VRAAG 3
+
+Er moeten 50 dozen met flesjes water, 50 dozen fruit, en 30 dozen broodjes worden vervoerd. In de bestelbus passen 25 dozen. Hoeveel verschillende ladingen kun je in het eerste ritje meenemen als je een volle lading meeneemt?
+
+x + y + z = 25, waarbij:
+0 ≤ x ≤ 50
+0 ≤ y ≤ 50
+0 ≤ z ≤ 30
+
+dozen_water: int = 50
+dozen_fruit: int = 50
+dozen_brood: int = 30
+capaciteit_dozen_bestelbus: int = 25
+
+mogelijke_combinaties: int = 0
+
+for x1 in range(dozen_water + 1):
+    for x2 in range(dozen_fruit + 1):
+        x3: int = (capaciteit_dozen_bestelbus - x1 - x2)
+
+        if 0 <= x3 <= dozen_brood:
+            mogelijke_combinaties += 1
+
+351 mogelijke combinaties voor de eerste lading dozen.
+
+------------------------------------------------------------------------------------------------------
+VRAAG 4
+
+Om af te studeren moet een student 30 vakken hebben afgerond, maar een student mag er ook meer doen. Een student kan daarbij kiezen uit 110 verschillende aangeboden vakken. Op hoeveel verschillende manieren kan een student afstuderen met 30, 31 of 32 vakken?
+
+Ieder vak kan slechts één keer gevolgd worden, dus herhaling is niet mogelijk. De volgorde doet er niet toe; vakken gehaald moeten worden — wanneer maakt niet uit.
+
+De formule hiervoor is:
+
+C(n, k) = n! / (k! * (n - k)!
+
+n = 110 en k = 30, 31, 32.
+
+Dus: C(110, 30) + C(110, 31) + C(110, 32)
+
+C(110,30) = 3,4525 * 10^25
+C(110,31) = 3,1386 * 10^25
+C(110,32) = 2,7965 * 10^25
+
+------------------------------------------------------------------------------------------------------
+VRAAG 5
+
+Een loterij heeft balletjes A t/m Z waaruit een notaris op volgorde 7 willekeurige balletjes trekt zonder terugleggen. Wat is de kans dat het lot met DBFAECG wint?
+
+Er worden 7 balletjes getrokken uit 26 (voor de 26 letters van het alfabet).
+
+Het aantal mogelijkheden = P(26, 7) = 26! / (26 - 7)!
+
+Er wint maar één volgorde, dus = 1 / P(26, 7)
+
+= 3.0163073641334513e-10
+
+------------------------------------------------------------------------------------------------------
+VRAAG 6
+
+Opnieuw moeten 50 dozen met flesjes water, 50 dozen fruit, en 30 dozen broodjes worden vervoerd. Je hebt nu een vrachtwagen waarin 45 dozen passen. Hoeveel verschillende ladingen kun je nu in het eerste ritje meenemen als je een volle lading meeneemt?
+
+Zie vraag 3 voor nadere toelichting.
+
+dozen_water: int = 50
+dozen_fruit: int = 50
+dozen_brood: int = 30
+capaciteit_dozen_bestelbus: int = 45
+
+mogelijke_combinaties: int = 0
+
+for x1 in range(dozen_water + 1):
+    for x2 in range(dozen_fruit + 1):
+        x3: int = (capaciteit_dozen_bestelbus - x1 - x2)
+
+        if 0 <= x3 <= dozen_brood:
+            mogelijke_combinaties += 1
+
+Het aantal mogelijke combinaties voor het eerste ritje is 961.
+
+------------------------------------------------------------------------------------------------------
+VRAAG 7 
+
+Variabelen eigen case
+
+1. Activiteit-gerelateerde variabelen
+
+Denk hierbij aan vakactiviteiten: hoorcolleges, werkcolleges en practica — elk met hun eigen kenmerken en eisen:
+- hoorcolleges: vereisen dat alle ingeschreven studenten in één sessie worden geplaatst;
+- werkcolleges en practica: kunnen in groepen worden verdeeld;
+- duur van de activiteiten: alle activiteiten duren twee uur.
+
+2. Tijd-gerelateerde variabelen
+
+Tijdssloten: Beschikbare perioden voor colleges:
+ - 9.00–11.00 uur;
+ - 11.00–13.00 uur;
+ - 13.00–15.00 uur;
+ - 15.00–17.00 uur.
+
+Verder zijn er Avondmomenten: 17.00–19.00 uur (met een malus van 5 punten per gebruik).
+Tussenmomenten — momementen waarop een student geen activiteit heeft – maar daarvoor en daarna wel een activiteit gepland staat.
+
+3. Locatie-gerelateerde variabelen
+
+ - zaalslots: combinaties van een tijdsslot en een zaal. Elk zaalslot kan slechts door één activiteit tegelijk worden gebruikt;
+ - zaalcapaciteit: aantal studenten dat in een zaal past. Te weinig capaciteit in een zaal voor de activiteit resulteert in maluspunten.
+
+4. Studenten-gerelateerde variabelen
+
+ - aantal inschrijvingen (per vak): het daadwerkelijke aantal ingeschreven studenten per vakactiviteit. Het gebruik hiervan zou geminimaliseerd moeten worden om maluspunten te voorkomen door de juiste zaalcapaciteit te kiezen;
+ - individuele studentenroosters: een student kan conflicten hebben als hij/zij meer dan één activiteit tegelijk heeft;
+ - tussensloten voor studenten: het aantal en de verdeling van tussensloten voor een student binnen een dag.
+
+5. Maluspunten
+
+ - zaalcapaciteit-maluspunt: voor iedere student die niet in een zaal past;
+ - avondslot-maluspunt: gebruik van het avondslot (5 maluspunten per gebruik);
+ - conflict-maluspunt: Roosterconflict waarbij een student meer dan één activiteit op hetzelfde moment heeft;
+ - tussenslot-maluspunt;
+ - eén tussenslot: 1 maluspunt;
+ - twee tussensloten op één dag: 3 maluspunten;
+ - drie tussensloten: Niet toegestaan.
+
+6. Optimalisatievariabelen
+
+ - aantal zaalslots: het totaal aantal gebruikte zaalslots (efficiëntie);
+ - aantal studenten per zaalslot: groepsindeling voor werkcolleges en practica om zaalcapaciteit optimaal te benutten;
+ - continuïteit van het rooster: minimaliseren van tussensloten om studentenbeleving en onderwijsdeelname te verbeteren.
+
+------------------------------------------------------------------------------------------------------
+VRAAG 8
+
+Bij het oplossen van deze roostercase is het noodzakelijk om enkele versimpelende aannames te maken om de complexiteit beheersbaar te houden. Een belangrijke aanname is dat het maximale aantal groepen voor werkcolleges en practica wordt beperkt tot een redelijk aantal, zoals maximaal vijf groepen. Dit voorkomt een exponentiële groei van de mogelijke combinaties bij het verdelen van studenten in groepen. Daarnaast geldt dat elk zaalslot, de combinatie van een tijdsslot en een zaal, door slechts één activiteit tegelijk gebruikt kan worden. Dit is niet alleen een restrictie vanuit het probleem, maar het voorkomt ook dat conflicterende roosters mogelijk worden, wat de oplossingsruimte beperkt.
+
+Ook wordt aangenomen dat activiteiten alleen gepland worden binnen de gegeven tijdssloten van 9:00 tot 17.00 uur — met incidenteel een avondslot van 17.00 uur tot 19.00 uur. Dit beperkt de mogelijke tijdstippen voor activiteiten en voorkomt dat tijdvakken buiten de werkdag in overweging worden genomen. Een andere aanname is dat hoorcolleges alle ingeschreven studenten tegelijkertijd moeten bevatten, zonder splitsing in groepen. Door dit expliciet te verbieden, wordt het aantal mogelijke combinaties waarbij studenten verdeeld worden over meerdere hoorcolleges aanzienlijk gereduceerd.
+
+Het gebruik van het avondslot wordt bovendien sterk beperkt, omdat dit gepaard gaat met hoge maluspunten. Deze aanname zorgt ervoor dat oplossingen die activiteiten naar het avondslot verplaatsen alleen overwogen worden als er geen andere mogelijkheid is. Verder is aangenomen dat roosters met meer dan drie tussensloten per dag voor een student ongeldig zijn. Dit voorkomt onpraktische roosters en elimineert oplossingen waarin studenten gedurende een dag meerdere grote gaten in hun rooster hebben.
+
+Door deze aannames blijft de omvang van de state-space beheersbaar. De combinatie van vaste tijdslots, beperking van het aantal groepen, eliminatie van conflicterende roosters, minimale inzet van het avondslot en strikte regels rondom zaalcapaciteit en tussensloten zorgt ervoor dat de oplossingsruimte nooit groter is dan het product van het aantal tijdsloten, zalen en groepsindelingen. Hierdoor blijft het mogelijk om met efficiënte technieken, zoals constraint-programming of heuristieken, een optimaal rooster te vinden zonder dat de complexiteit oncontroleerbaar wordt.
+
+------------------------------------------------------------------------------------------------------
+VRAAG 9
+
+De formule voor de bovengrens van een statespace.
+
+S = (T * Z)^A * G
+
+T: het aantal beschikbare tijdsloten;
+Z: het aantal beschikbare zalen;
+A: het aantal activiteiten (hoorcolleges, werkcolleges etc.);
+G: het aantal mogelijke groepsindelingen voor werkcolleges.
+
+Combinaties tijdsloten en zalen (T * Z). Toewijzingen van activiteiten aan tijdsloten: (T * Z)^A.
+
+------------------------------------------------------------------------------------------------------
+VRAAG 10
+
+Stel dat:
+
+T = 25 (5 tijdsloten per dag, 5 dagen per week);
+Z = 10 (10 beschikbare zalen);
+A = 30 (30 totale activiteiten);
+G = 5 (maximaal 5 mogelijke groepsindelingen voor alle activiteiten).
+
+Dan wordt de bovengrens van de state-space: S = (25 * 10)^30 * 5 = 250^30 * 5.
+
+Dus: 4.3368087e+72 mogelijk configuraties.
+
+Deze formule geeft een theoretische bovengrens van de oplossingsruimte. In de praktijk zal deze state-space aanzienlijk kleiner zijn door de beperkingen en restricties van de case, zoals conflicten, zaalcapaciteit en minimale tussensloten.
+
+------------------------------------------------------------------------------------------------------
+VRAAG 11
+
+
+
+
+
+
+

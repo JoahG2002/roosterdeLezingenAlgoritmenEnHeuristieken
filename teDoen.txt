@@ -1,0 +1,10 @@
+- een zaal bevat een activiteit, en kan ieder type faciliteren;
+- in een hoorcollege moet het gehele opleidingsjaar/alle inschrijvingen kunnen passen;
+- 9.00–11.00, 11.00–13.00, 13.00–15.00 of 15.00–17.00;
+- een geldig weekrooster: alle roosterbare activiteiten van ieder vak hebben een tijdsslot met een zaal hebben. Het paar tijdsslot-zaal een zaalslot.
+- zaalslot kan enkel gebruikt worden voor één activiteit.
+- docstrings
+- processen, threads?
+- .so od .dll's?
+
+"./data/vakken.csv"
