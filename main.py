@@ -23,6 +23,8 @@ def main(argc: int, argv: list[str]) -> None:
     # roostermaker.print_alle_studentroosters()
     roostermaker.naar_csv()
 
+    roostermaker.print_strafpunten()
+
     exit(returncodes.SUCCES)
 
 

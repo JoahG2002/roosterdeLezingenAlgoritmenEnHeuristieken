@@ -18,3 +18,9 @@ laatste en nog niet gebruikt.
 studenten los toevoegen
 
 meerdere lokalen voor werkcolleges
+
+algoritme1: basis
+algoritme2: basis verbeterd
+algoritme3: geoptimaliseerd met 75 overige plaatsen
+
+75 plaatsen over

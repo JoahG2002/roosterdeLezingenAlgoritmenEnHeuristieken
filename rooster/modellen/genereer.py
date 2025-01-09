@@ -187,11 +187,24 @@ class Roostermaker:
         for student in self.__studenten:
             self.print_rooster_student(student)
 
-    def bereken_strafpunten(self) -> int:
+    def _bereken_strafpunten(self) -> int:
         """
         Berekent het aantal strafpunten van de huidige roosterconfiguratie.
         """
-        ...
+        strafpunten: int = 0
+
+        strafpunten += sum(
+            5 for roosteractiviteit in self.__rooster if roosteractiviteit and
+            roosteractiviteit[0].tijdslot.tijdstip.startswith("17") and not roosteractiviteit[1].type.startswith('h')
+        )
+
+        return strafpunten
+
+    def print_strafpunten(self) -> None:
+        """
+        Print de strafpunten van het rooster.
+        """
+        sys.stdout.write(f"\nStrafpunten rooster: {Fore.RED}{self._bereken_strafpunten()}{Style.RESET_ALL}.\n")
 
     def naar_csv(self) -> None:
         """
