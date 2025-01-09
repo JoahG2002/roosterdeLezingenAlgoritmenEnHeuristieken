@@ -6,8 +6,8 @@ from ..constants.constant import returncodes
 class Vak:
     __slots__: tuple[str, ...] = (
         "naam", "aantal_hoorcolleges", "aantal_werkcolleges", "aantal_practica", "verwacht_aantal_student",
-        "maximumaantal_studenten_werkcollege", "__aantal_studenten_per_werkcollege", "__studentnummers",
-        "__aantal_studenten_per_practicum", "__grootten_werkcolleges", "__grootten_practica"
+        "maximumaantal_studenten_werkcollege", "aantal_studenten_per_werkcollege", "__studentnummers",
+        "aantal_studenten_per_practicum", "__grootten_werkcolleges", "__grootten_practica"
     )
 
     def __init__(self,
@@ -23,8 +23,8 @@ class Vak:
         self.aantal_werkcolleges: int = aantal_werkcolleges
         self.aantal_practica: int = aantal_practica
         self.verwacht_aantal_student: int = verwacht_aantal_student
-        self.__aantal_studenten_per_werkcollege: int | None = aantal_studenten_per_werkcollege
-        self.__aantal_studenten_per_practicum: int | None = aantal_studenten_per_practicum
+        self.aantal_studenten_per_werkcollege: int | None = aantal_studenten_per_werkcollege
+        self.aantal_studenten_per_practicum: int | None = aantal_studenten_per_practicum
 
         self.__studentnummers: set[int] = set()
         self.__grootten_werkcolleges: list[int] = []
@@ -53,52 +53,46 @@ class Vak:
             for i in range(self.aantal_practica):
                 self.__grootten_werkcolleges.append(0)
 
+        # print(f"{self.__grootten_practica=}, {self.aantal_practica=}")
+        # print(f"{self.__grootten_werkcolleges=}, {self.aantal_werkcolleges=}")
+
     def geef_aantal_studenten_per_niet_hoorcollege(self, voor_werkcollege: bool) -> int:
         """
         Geeft terug hoeveel studenten zijn toegestaan bij een activiteit die geen hoorcollege is — waarbij niet het gehele leerjaar aanwezig mag zijn in één zaal.
         """
         if voor_werkcollege:
-            return self.__aantal_studenten_per_werkcollege
+            return self.aantal_studenten_per_werkcollege
 
-        return self.__aantal_studenten_per_practicum
+        return self.aantal_studenten_per_practicum
 
-    def voeg_student_toe(self, id_student: int, activiteittype: str) -> Literal[0, -1]:
+    def ruimte_in_werkcollege_practicum(self, activiteittype: str) -> Literal[0, -1]:
         """
-        Voegt een student toe aan het vak, en geeft met een code terug of dat is gelukt.
+        Geeft terug of er plaats is voor een student in een van de werkcolleges of practica van een vak.
         """
-        if activiteittype == "hoorcollege":
-            return returncodes.SUCCES
-
-        plek_gevonden: bool = False
+        return returncodes.SUCCES
 
         if activiteittype == "werkcollege":
-            for i in range(1, 5):
-                if self.__grootten_werkcolleges.__len__() == i:
-                    for j in range(i):
-                        if not plek_gevonden and (self.__grootten_werkcolleges[j] < self.__aantal_studenten_per_werkcollege):
-                            self.__studentnummers.add(id_student)
+            for i in range(self.aantal_werkcolleges):
+                if self.__grootten_werkcolleges[i] < self.aantal_studenten_per_werkcollege:
+                    self.__grootten_werkcolleges[i] += 1
 
-                            self.__grootten_werkcolleges[j] += 1
-                            plek_gevonden = True
+                    return returncodes.SUCCES
 
-                            break
+                return returncodes.MISLUKT
 
-        if activiteittype == "practicum":
-            for i in range(1, 5):
-                if self.__grootten_practica.__len__() == i:
-                    for j in range(i):
-                        if not plek_gevonden and (self.__grootten_practica[j] < self.__aantal_studenten_per_practicum):
-                            self.__studentnummers.add(id_student)
+        for i in range(self.aantal_practica):
+            if self.__grootten_practica[i] < self.aantal_studenten_per_practicum:
+                self.__grootten_practica[i] += 1
 
-                            self.__grootten_werkcolleges[j] += 1
-                            plek_gevonden = True
+                return returncodes.SUCCES
 
-                            break
+        return returncodes.MISLUKT
 
-        if not plek_gevonden:
-            return returncodes.MISLUKT
-
-        return returncodes.SUCCES
+    def voeg_student_toe(self, studentnummer: int) -> None:
+        """
+        Voegt een student toe aan het vak.
+        """
+        self.__studentnummers.add(studentnummer)
 
     def aantal_studenten(self) -> int:
         """

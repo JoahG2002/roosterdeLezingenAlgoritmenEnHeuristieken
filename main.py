@@ -20,7 +20,7 @@ def main(argc: int, argv: list[str]) -> None:
     roostermaker: Roostermaker = Roostermaker(roosterdata)
 
     roostermaker.genereer_rooster()
-    roostermaker.print_alle_studentroosters()
+    # roostermaker.print_alle_studentroosters()
     roostermaker.naar_csv()
 
     exit(returncodes.SUCCES)

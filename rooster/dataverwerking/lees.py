@@ -139,7 +139,7 @@ class Roosterdata:
                     if not (vak_student == vak.naam):
                         continue
 
-                    vak.voeg_student_toe(student.studentnummer, )
+                    vak.voeg_student_toe(student.studentnummer)
 
     def _lees_roosterdata(self) -> None:
         """
@@ -160,6 +160,3 @@ class Roosterdata:
         self.STUDENTEN = self._lees_student_vakdata()
 
         self._update_studentaantallen_vak()
-
-        for vak in self.VAKKEN:
-            vak.bereken_aantal_studenten_per_werkcollege()

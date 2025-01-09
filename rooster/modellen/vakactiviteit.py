@@ -9,3 +9,6 @@ class Vakactiviteit:
     def __init__(self, vak: Vak, type_: Literal["hoorcollege", "werkcollege", "practicum"]) -> None:
         self.vak: Vak = vak
         self.type: Literal["hoorcollege", "werkcollege", "practicum"] = type_
+
+    def __hash__(self) -> int:
+        return hash((self.vak, self.type))
