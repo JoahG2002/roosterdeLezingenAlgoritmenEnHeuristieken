@@ -50,7 +50,7 @@ class Roostermaker:
         """
         zaalnamen_met_grootten: dict[str, int] = {zaal.naam: zaal.capaciteit for zaal in self.__zalen}
         zalen_gesorteerd: list[tuple[str, int]] = sorted(zaalnamen_met_grootten.items(), key=lambda x: x[1])
-        
+
         zalen_gesorteerd_: list[Zaal | None] = [None] * zalen.__len__()
 
         for i, zaalnaam_met_grootte in enumerate(zalen_gesorteerd):

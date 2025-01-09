@@ -139,7 +139,7 @@ class Roosterdata:
                     if not (vak_student == vak.naam):
                         continue
 
-                    vak.voeg_student_toe(student.studentnummer)
+                    vak.voeg_student_toe(student.studentnummer, )
 
     def _lees_roosterdata(self) -> None:
         """

@@ -14,3 +14,5 @@ python3.12 main.py --vakken ./data/vakken.csv --zalen ./data/zalen.csv --sv ./da
 geem werlcollege op dezelfde dag
 
 laatste en nog niet gebruikt.
+
+studenten los toevoegen
