@@ -10,7 +10,6 @@ class Maxima:
     def __init__(self) -> None:
         self.AANTAL_TIJDSLOTEN_WEEK: Final[int] = 20  # 5 dagen per week, vier tijdsloten per dag
         self.AANTAL_WEKEN_JAAR: Final[int] = 52  # 5 dagen per week, vier tijdsloten per dag
-        self.AANTAL_WERKCOLLEGES_TEGELIJKERTIJD_PER_VAK: Final[int] = 5
 
 
 class Tekst:

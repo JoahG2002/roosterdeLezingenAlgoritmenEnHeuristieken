@@ -7,15 +7,17 @@ from .vak import Vak
 from .tijdslot import Tijdslot
 from .zaal import Zaal, Zaalslot
 from .vakactiviteit import Vakactiviteit
+from ..dataverwerking.lees import Roosterdata
 from ..dataverwerking.schrijf import schrijf_foutmelding
 from ..constants.constant import returncodes, tijdeenheden
 
 
 class Roostermaker:
-    __slots__: tuple[str, ...] = ("zalen", "TIJDSLOTEN", "rooster")
+    __slots__: tuple[str, ...] = ("zalen", "vakken", "TIJDSLOTEN", "rooster")
 
-    def __init__(self, zalen: tuple[Zaal, ...]) -> None:
-        self.zalen: tuple[Zaal, ...] = zalen
+    def __init__(self, roosterdata: Roosterdata) -> None:
+        self.zalen: tuple[Zaal, ...] = roosterdata.ZALEN
+        self.vakken: tuple[Vak, ...] = roosterdata.VAKKEN
 
         self.TIJDSLOTEN: Final[tuple[Tijdslot, ...]] = (
             Tijdslot(weekdag="maandag", tijdstip="9.00–11.00"), Tijdslot(weekdag="maandag", tijdstip="11.00–13.00"),
@@ -68,11 +70,11 @@ class Roostermaker:
 
         return returncodes.MISLUKT
 
-    def genereer_rooster(self, vakken: tuple[Vak, ...]) -> dict[Zaalslot, Vakactiviteit]:
+    def genereer_rooster(self) -> dict[Zaalslot, Vakactiviteit]:
         """
         Genereert een rooster voor een gegeven tuple vakactiviteiten.
         """
-        for vak in vakken:
+        for vak in self.vakken:
             for _ in range(vak.aantal_hoorcolleges):
                 if self.rooster_activiteit_in(Vakactiviteit(vak, "hoorcollege")) == returncodes.MISLUKT:
                     schrijf_foutmelding(f"het is niet gelukt een hoorcollegetijdslot te vinden voor {vak.naam}!")

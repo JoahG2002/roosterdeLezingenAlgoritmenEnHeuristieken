@@ -7,4 +7,4 @@
 - processen, threads?
 - .so od .dll's?
 
-"./data/vakken.csv"
+python3.12 main.py --vakken ./data/vakken.csv --zalen ./data/zalen.csv --sv ./data/studenten_en_vakken.csv
