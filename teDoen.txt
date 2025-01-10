@@ -9,7 +9,7 @@
 
 sommige vakken hebben geen maximumaantal leerlingen, wel verwacht
 
-python3.12 main.py --vakken ./data/vakken.csv --zalen ./data/zalen.csv --sv ./data/studenten_en_vakken.csv --resultaat ./data/resultaatAlgoritme3.csv
+python3.12 main.py --vakken ./data/vakken.csv --zalen ./data/zalen.csv --sv ./data/studenten_en_vakken.csv --resultaat ./data/resultaatAlgoritme4.csv
 
 geem werlcollege op dezelfde dag
 
@@ -21,6 +21,10 @@ meerdere lokalen voor werkcolleges
 
 algoritme1: basis
 algoritme2: basis verbeterd
-algoritme3: geoptimaliseerd met 75 overige plaatsen
+algoritme3: geoptimaliseerd met 75 overige plaatsen, 112866 strafpunten
 
 75 plaatsen over
+
+Een geldig weekrooster is een weekrooster waarvoor aan alle roosterbare activiteiten van ieder vak een tijdsslot met een zaal hebben. We noemen het paar tijdsslot-zaal een zaalslot.
+
+Werkcolleges en practica mogen in meerdere groepen gegeven worden. In tegenstelling tot een hoorcollege hoeven daarbij niet alle ingeschreven studenten in één sessie bedeeld te worden. Maak hiervan gebruik om het rooster te verbeteren.

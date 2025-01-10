@@ -26,15 +26,15 @@ class Roostermaker:
         self.__pad_resultaten_csv: str = roosterdata.PAD_CSV_RESULTATEN
 
         self.TIJDSLOTEN: Final[tuple[Tijdslot, ...]] = (
-            Tijdslot(weekdag="maandag", tijdstip="9.00–11.00"), Tijdslot(weekdag="maandag", tijdstip="11.00–13.00"),
+            Tijdslot(weekdag="maandag", tijdstip="09.00–11.00"), Tijdslot(weekdag="maandag", tijdstip="11.00–13.00"),
             Tijdslot(weekdag="maandag", tijdstip="13.00–15.00"), Tijdslot(weekdag="maandag", tijdstip="15.00–17.00"),
-            Tijdslot(weekdag="dinsdag", tijdstip="9.00–11.00"), Tijdslot(weekdag="dinsdag", tijdstip="11.00–13.00"),
+            Tijdslot(weekdag="dinsdag", tijdstip="09.00–11.00"), Tijdslot(weekdag="dinsdag", tijdstip="11.00–13.00"),
             Tijdslot(weekdag="dinsdag", tijdstip="13.00–15.00"), Tijdslot(weekdag="dinsdag", tijdstip="15.00–17.00"),
-            Tijdslot(weekdag="woensdag", tijdstip="9.00–11.00"), Tijdslot(weekdag="woensdag", tijdstip="11.00–13.00"),
+            Tijdslot(weekdag="woensdag", tijdstip="09.00–11.00"), Tijdslot(weekdag="woensdag", tijdstip="11.00–13.00"),
             Tijdslot(weekdag="woensdag", tijdstip="13.00–15.00"), Tijdslot(weekdag="woensdag", tijdstip="15.00–17.00"),
-            Tijdslot(weekdag="donderdag", tijdstip="9.00–11.00"), Tijdslot(weekdag="donderdag", tijdstip="11.00–13.00"),
+            Tijdslot(weekdag="donderdag", tijdstip="09.00–11.00"), Tijdslot(weekdag="donderdag", tijdstip="11.00–13.00"),
             Tijdslot(weekdag="donderdag", tijdstip="13.00–15.00"), Tijdslot(weekdag="donderdag", tijdstip="15.00–17.00"),
-            Tijdslot(weekdag="vrijdag", tijdstip="9.00–11.00"), Tijdslot(weekdag="vrijdag", tijdstip="11.00–13.00"),
+            Tijdslot(weekdag="vrijdag", tijdstip="09.00–11.00"), Tijdslot(weekdag="vrijdag", tijdstip="11.00–13.00"),
             Tijdslot(weekdag="vrijdag", tijdstip="13.00–15.00"), Tijdslot(weekdag="vrijdag", tijdstip="15.00–17.00"),
             Tijdslot(weekdag="vrijdag", tijdstip="17.00–19.00")
         )
@@ -157,35 +157,12 @@ class Roostermaker:
                         f"{Fore.YELLOW}({vakactiviteit.type}){Style.RESET_ALL}\n"
                     )
 
-    @staticmethod
-    def print_rooster_student(student: Student) -> None:
-        """
-        Print het persoonlijke rooster van een student naar de stdout (de standaarduitvoerstroom).
-        """
-        if not student.rooster:
-            raise ValueError("Geen rooster is not gegenereerd voor deze student; printen onmogelijk.")
-
-        sys.stdout.write(
-            f"ROOSTER {Fore.GREEN}{student.volledige_naam}{Fore.MAGENTA}"
-            f" ({student.studentnummer}){Style.RESET_ALL}\n{'-' * 85}\n"
-        )
-
-        for dag in tijdeenheden.WEEKDAGEN:
-            sys.stdout.write(f"\n{dag.upper()}\n{'-' * 110}\n")
-
-            for zaalslot, vakactiviteit in student.rooster.items():
-                if zaalslot.tijdslot.weekdag == dag:
-                    sys.stdout.write(
-                        f"- {Fore.BLUE}{zaalslot.zaal.naam}: {Fore.MAGENTA}{vakactiviteit.vak.naam} "
-                        f"{Fore.YELLOW}({vakactiviteit.type}){Style.RESET_ALL}\n"
-                    )
-
     def print_alle_studentroosters(self) -> None:
         """
         Print het rooster van iedere student.
         """
         for student in self.__studenten:
-            self.print_rooster_student(student)
+            student.print_rooster()
 
     def _bereken_strafpunten(self) -> int:
         """
@@ -197,6 +174,9 @@ class Roostermaker:
             5 for roosteractiviteit in self.__rooster if roosteractiviteit and
             roosteractiviteit[0].tijdslot.tijdstip.startswith("17") and not roosteractiviteit[1].type.startswith('h')
         )
+
+        for student in self.__studenten:
+            strafpunten += student.bereken_strafpunten_roostergaten()
 
         return strafpunten
 
@@ -218,10 +198,10 @@ class Roostermaker:
 
             for student in self.__studenten:
                 vakken_met_huidig_werkcollege: dict[str, dict[str, int]] = {
-                    naam_vak: {"practicum": 0, "hoorcollege": 0, "werkcollege": 0} for naam_vak in student.vaknamen
+                    naam_vak: {"practicum": 0, "hoorcollege": 0, "werkcollege": 0} for naam_vak in student.geef_vaknamen()
                 }
 
-                for zaalslot, activiteit in student.rooster.items():
+                for zaalslot, activiteit in student.geef_rooster():
                     vakken_met_huidig_werkcollege[activiteit.vak.naam][activiteit.type] += 1
 
                     csv_bestand.write(

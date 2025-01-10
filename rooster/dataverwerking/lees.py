@@ -134,12 +134,11 @@ class Roosterdata:
         Updatet het aantal student dat daadwerkelijk ieder vak volgt.
         """
         for student in self.STUDENTEN:
-            for vak_student in student.vaknamen:
-                for vak in self.VAKKEN:
-                    if not (vak_student == vak.naam):
-                        continue
+            for vak in self.VAKKEN:
+                if not student.volgt_vak(vak.naam):
+                    continue
 
-                    vak.voeg_student_toe(student.studentnummer)
+                vak.voeg_student_toe(student.studentnummer)
 
     def _lees_roosterdata(self) -> None:
         """
