@@ -110,13 +110,13 @@ class Roosterdata:
             for i in range(dataframe_zalen.__len__())
         )
 
-    def _lees_student_vakdata(self) -> tuple[Student, ...]:
+    def _lees_student_vakdata(self) -> None:
         """
         Leest de student vakdata in uit het csv-bestand.
         """
         dataframe_student_vakdata: DataFrame = read_csv(self.__PAD_STUDENT_VAKKENDATA_CSV, infer_schema=11, encoding="utf8")
 
-        return tuple(
+        self.STUDENTEN = tuple(
             Student(
                 studentnummer=dataframe_student_vakdata["Stud.Nr."][i],
                 voornaam=dataframe_student_vakdata["Voornaam"][i],
@@ -149,13 +149,14 @@ class Roosterdata:
 
         proces1: Thread = Thread(target=self._lees_vakdata)
         proces2: Thread = Thread(target=self._lees_zaaldata)
+        proces3: Thread = Thread(target=self._lees_student_vakdata)
 
         proces1.start()
         proces2.start()
+        proces3.start()
 
         proces1.join()
         proces2.join()
-
-        self.STUDENTEN = self._lees_student_vakdata()
+        proces3.join()
 
         self._update_studentaantallen_vak()
