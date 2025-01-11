@@ -14,11 +14,11 @@ def main(argc: int, argv: list[str]) -> None:
     roosterdata: Roosterdata = Roosterdata(argv)
 
     if not roosterdata.inlezen_geslaagd():
-        schrijf_foutmelding("minstens één van de opgegeven csv-bestandpaden bestaat niet.\n")
+        schrijf_foutmelding(teksten.CSV_BESTAAT_NIET)
         exit(returncodes.MISLUKT)
 
     if not (roosterdata.MODUS_ALGORITME in algoritmen.VALIDEN):
-        schrijf_foutmelding("ongeldig algoritme; programma gestopt.\n")
+        schrijf_foutmelding(teksten.ONGELDIG_ALGORITME)
         exit(returncodes.MISLUKT)
 
     roostermaker: Roostermaker = Roostermaker(roosterdata)
@@ -26,7 +26,7 @@ def main(argc: int, argv: list[str]) -> None:
     roostermaker.genereer_rooster()
 
     if not roostermaker.is_valide_rooster():
-        sys.stderr.write("\nRooster invalide: niet iedere activiteit van ieder vak is ingeroosterd.\n\n")
+        schrijf_foutmelding("rooster invalide: niet iedere activiteit van ieder vak is ingeroosterd.\n\n")
 
     roostermaker.print_rooster()
 

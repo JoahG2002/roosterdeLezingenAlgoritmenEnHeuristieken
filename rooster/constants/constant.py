@@ -6,7 +6,8 @@ from typing import Final, Literal
 
 class Maxima:
     __slots__: tuple[str, ...] = (
-        "AANTAL_TIJDSLOTEN_WEEK", "AANTAL_WEKEN_JAAR", "AANTAL_WERKCOLLEGES_TEGELIJKERTIJD_PER_VAK", "GROOTSTE_ZAAL"
+        "AANTAL_TIJDSLOTEN_WEEK", "AANTAL_WEKEN_JAAR", "AANTAL_WERKCOLLEGES_TEGELIJKERTIJD_PER_VAK", "GROOTSTE_ZAAL",
+        "ONGELDIG_ALGORITME"
     )
 
     def __init__(self) -> None:
@@ -17,7 +18,8 @@ class Maxima:
 
 class Tekst:
     __slots__: tuple[str, ...] = (
-        "ONGELDIG_TIJDSLOT", "TOELICHTING_TEKORT_VLAGGEN", "KOLOMMEN_RESULTATEN_CSV", "KOLOMMEN_PRESTATIES_ALGORITMEN_CSV"
+        "ONGELDIG_TIJDSLOT", "TOELICHTING_TEKORT_VLAGGEN", "KOLOMMEN_RESULTATEN_CSV", "KOLOMMEN_PRESTATIES_ALGORITMEN_CSV",
+        "CSV_BESTAAT_NIET", "ONGELDIG_ALGORITME"
     )
 
     def __init__(self) -> None:
@@ -41,6 +43,8 @@ class Tekst:
             f" {Fore.YELLOW}--lussen{Fore.CYAN} 1500"
             f" {Fore.YELLOW}--algoritme{Fore.CYAN} hillclimbing {Style.RESET_ALL}\n\n"
         )
+        self.CSV_BESTAAT_NIET: Final[str] = "minstens één van de opgegeven csv-bestandpaden bestaat niet.\n"
+        self.ONGELDIG_ALGORITME: Final[str] = f"ongeldig algoritme; programma gestopt. Kies uit: {Algoritme.VALIDEN}\n"
 
         self.KOLOMMEN_RESULTATEN_CSV: Final[str] = "naamStudent,vak,type,zaal,dag,tijdslot\n"
         self.KOLOMMEN_PRESTATIES_ALGORITMEN_CSV: Final[str] = (

@@ -17,7 +17,7 @@ from .strafpunt import BundelStrafpunten
 from .activiteit import Vakactiviteit
 from ..dataverwerking.lees import Roosterdata
 from ..constants.constant import tijdeenheden, teksten
-from ..dataverwerking.schrijf import print_voortgang_algoritme
+from ..dataverwerking.schrijf import schrijf_voortgang_algoritme
 
 
 class Roostermaker:
@@ -31,6 +31,7 @@ class Roostermaker:
     def __init__(self, roosterdata: Roosterdata) -> None:
         self.__ZALEN: tuple[Zaal, ...] = self._sorteer_zalen(roosterdata.ZALEN)
         self.__vakken: tuple[Vak, ...] = self._sorteer_vakken_op_grootte(roosterdata.VAKKEN)
+
         self.__studenten: set[Student] = set(roosterdata.STUDENTEN)
 
         self.__pad_resultaten_csv: str = roosterdata.PAD_CSV_RESULTATEN
@@ -376,7 +377,7 @@ class Roostermaker:
                 studenten_beste_rooster = deepcopy(studenten_huidige_lus)
                 vakken_beste_rooster = deepcopy(vakken_huidige_lus)
 
-                print_voortgang_algoritme(nieuw_aantal_strafpunten, lus, self.__aantal_lussen)
+                schrijf_voortgang_algoritme(nieuw_aantal_strafpunten, lus, self.__aantal_lussen)
 
                 continue
 
@@ -384,8 +385,6 @@ class Roostermaker:
         self.__zaalsloten_ingeroosterd = zaalsloten_beste_rooster
         self.__studenten = studenten_beste_rooster
         self.__vakken = tuple(vakken_beste_rooster)
-
-        self._bereken_strafpunten()
 
     def _genereer_rooster_simulated_annealing(self) -> None:
         """
@@ -455,14 +454,12 @@ class Roostermaker:
                     studenten_beste_rooster = deepcopy(studenten_huidige_lus)
                     vakken_beste_rooster = deepcopy(vakken_huidige_lus)
 
-                    print_voortgang_algoritme(nieuw_aantal_strafpunten, lus, self.__aantal_lussen)
+                    schrijf_voortgang_algoritme(nieuw_aantal_strafpunten, lus, self.__aantal_lussen)
 
         self.__rooster = beste_rooster
         self.__zaalsloten_ingeroosterd = zaalsloten_beste_rooster
         self.__studenten = studenten_beste_rooster
         self.__vakken = tuple(vakken_beste_rooster)
-
-        self._bereken_strafpunten()
 
     def genereer_rooster(self) -> None:
         """
@@ -478,6 +475,8 @@ class Roostermaker:
 
         if self.__modus_algoritme == "simulatedAnnealing":
             self._genereer_rooster_simulated_annealing()
+
+        self._bereken_strafpunten()
 
         self.duur_genereren_seconden = (time.time() - self.start_genereren)
 
