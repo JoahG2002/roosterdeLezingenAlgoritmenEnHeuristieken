@@ -21,6 +21,9 @@ def main(argc: int, argv: list[str]) -> None:
 
     roostermaker.genereer_rooster(modus="deterministisch", aantal_lussen=1)
 
+    if not roostermaker.is_valide_rooster():
+        sys.stderr.write("\nRooster invalide: niet iedere activiteit van ieder vak is ingeroosterd.\n\n")
+
     roostermaker.print_rooster()
 
     # roostermaker.print_alle_studentroosters()

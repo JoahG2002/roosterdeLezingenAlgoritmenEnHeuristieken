@@ -68,6 +68,16 @@ class Vak:
 
         return self.aantal_studenten_per_practicum
 
+    def alle_activiteiten_ingeroosterd(self) -> bool:
+        """
+        Geeft terug of alle activiteiten van een vak zijn ingeroosterd.
+        """
+        return (
+                (len(self.__hoorcolleges) == self.aantal_hoorcolleges)
+                and (len(self.__werkcolleges) == self.aantal_werkcolleges)
+                and (len(self.__practica) == self.aantal_practica)
+        )
+
     def voeg_student_toe(self, studentnummer: int) -> None:
         """
         Voegt een student toe aan het vak.
