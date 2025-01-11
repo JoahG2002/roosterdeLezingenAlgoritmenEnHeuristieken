@@ -1,10 +1,13 @@
 - een geldig weekrooster: alle roosterbare activiteiten van ieder vak hebben een tijdsslot met een zaal hebben. Het paar tijdsslot-zaal een zaalslot.
 - processen, threads?
-- .so od .dll's?
 
 meerdere cores
 
 python3.12 main.py --vakken ./data/vakken.csv --zalen ./data/zalen.csv --sv ./data/studenten_en_vakken.csv --resultaat ./data/roosterHillclimber.csv --prestatie ./data/prestatiesAlgoritmen.csv --lussen 15 --algoritme hillclimbing
+
+VISUALISATIE
+rood if waarde > X
+beste algoritme*
 
 geem werlcollege op dezelfde dag, niet per se nodig
 
@@ -12,16 +15,18 @@ deterministisch:
 deterministishV2: lette op ruimtecapaciteit en sorteerde de zalen van groot naar klein, i.p.v. vice versa
 hillclimberV1: posities rooster wisselen doet niets. zaalsloten
 hillclimberV2: zaalsloten verwisselen: het werkt! 
-
-strafpunten meerdere processen?
+simulated annealing: 
 
 Een geldig weekrooster is een weekrooster waarvoor aan alle roosterbare activiteiten van ieder vak een tijdsslot met een zaal hebben. We noemen het paar tijdsslot-zaal een zaalslot.
 
-In C++ voor snelheid
-
 20-46,100 strafpunten
 
-Simulated unhealsing
 Genetic algorithm 
 Planned propagation
-Wouter Vrielink
+
+requirements.txt
+
+gcc -O3 -fPIC -c reken.c -o reken.o -Wall -Werror
+gcc -O3 -shared -o reken.dll -fPIC reken.c -Wall -Werror
+gcc -O3 -shared -o reken.so reken.o -lm -Wall -Werror
+
