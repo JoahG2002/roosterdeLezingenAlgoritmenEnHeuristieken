@@ -1,13 +1,13 @@
 import sys
 
-from rooster.modellen.genereer import Roostermaker
+from rooster.modellen.roostermaker import Roostermaker
 from rooster.dataverwerking.lees import Roosterdata
 from rooster.dataverwerking.schrijf import schrijf_foutmelding
 from rooster.constants.constant import returncodes, teksten
 
 
 def main(argc: int, argv: list[str]) -> None:
-    if not (argc == 9):
+    if not (argc == 11):
         schrijf_foutmelding(teksten.TOELICHTING_TEKORT_VLAGGEN)
         exit(returncodes.MISLUKT)
 
@@ -19,7 +19,9 @@ def main(argc: int, argv: list[str]) -> None:
 
     roostermaker: Roostermaker = Roostermaker(roosterdata)
 
-    roostermaker.genereer_rooster()
+    roostermaker.genereer_rooster(modus="deterministisch", aantal_lussen=1)
+    roostermaker.prestatie_algoritme_naar_csv()
+    roostermaker.print_rooster()
     # roostermaker.print_alle_studentroosters()
     roostermaker.naar_csv()
 
