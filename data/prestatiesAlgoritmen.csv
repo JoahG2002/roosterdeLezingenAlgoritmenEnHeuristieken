@@ -1,4 +1,8 @@
-naamAlgoritme,dubbelIngeroosterd,tussentijdsloten,vakactiviteitenNietIngeroosterd,avond,overvol,aantalLussen,totaal
-deterministisch,1228,45405,23,85,29,1,45490
-deterministisch,1228,45405,23,85,29,1,45490
-deterministischV2,652,27429,62,85,0,1,27514
+naamAlgoritme,dubbelIngeroosterd,tussentijdsloten,vakNietIngeroosterd,avond,overvol,aantalLussen,totaal,duurGenerenSeconden
+deterministisch,1228,45405,23,85,29,1,45490,0.0028
+deterministischV2,652,27429,62,85,0,1,27514,0.003
+deterministischV2,652,27429,62,85,0,1,27514,0.0031
+hillclimber,652,27429,62,85,0,15,27514,0.009377718
+hillclimber,652,27429,62,85,0,15,27514,0.07565474510192871
+hillclimber,652,27429,62,85,0,200,27514,0.8678061962127686
+hillclimber,652,27429,62,85,0,2000,27514,8.415838956832886

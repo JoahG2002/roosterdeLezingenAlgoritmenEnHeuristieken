@@ -1,5 +1,6 @@
 import os
 
+from typing import Literal
 from threading import Thread
 from polars import read_csv, DataFrame
 
@@ -10,8 +11,9 @@ from ..modellen.student import Student
 
 class Roosterdata:
     __slots__: tuple[str, ...] = (
-        "__PAD_VAKDATA_CSV", "__PAD_ZAALDATA_CSV", "__PAD_STUDENT_VAKKENDATA_CSV", "VAKKEN", "ZALEN",
-        "__student_vakdata_ingelezen", "PAD_CSV_RESULTATEN", "STUDENTEN", "NAAM_NAAR_VAK", "PAD_CSV_PRESTATIES_ALGORITMEN"
+        "__PAD_VAKDATA_CSV", "__PAD_ZAALDATA_CSV", "__PAD_STUDENT_VAKKENDATA_CSV", "VAKKEN", "ZALEN", "MODUS_ALGORITME",
+        "__student_vakdata_ingelezen", "PAD_CSV_RESULTATEN", "STUDENTEN", "NAAM_NAAR_VAK", "PAD_CSV_PRESTATIES_ALGORITMEN",
+        "AANTAL_LUSSEN"
     )
 
     def __init__(self, argv: list[str]) -> None:
@@ -19,17 +21,19 @@ class Roosterdata:
         self.__PAD_ZAALDATA_CSV: str = ''
         self.__PAD_STUDENT_VAKKENDATA_CSV: str = ''
         self.PAD_CSV_RESULTATEN: str = ''
+        self.MODUS_ALGORITME: Literal["deterministisch", "hillclimber", ''] = ''
+        self.AANTAL_LUSSEN: int = 0
 
         self.VAKKEN: tuple[Vak, ...] | None = None
         self.ZALEN: tuple[Zaal, ...] | None = None
         self.STUDENTEN: tuple[Student, ...] | None = None
 
-        self._vind_csv_paden(argv)
+        self._verwerk_argv(argv)
         self._lees_roosterdata()
 
-    def _vind_csv_paden(self, argv: list[str]) -> None:
+    def _verwerk_argv(self, argv: list[str]) -> None:
         """
-        Vindt de csv-bestandpaden in de argv.
+        Verwerkt de argv door de data hierin op te slaan in de attributen van het Roosterdataobject.
         """
         i: int = 1
 
@@ -56,9 +60,25 @@ class Roosterdata:
                 self.PAD_CSV_RESULTATEN = argv[i + 1].strip()
 
                 i += 2
+                continue
 
             if argv[i] == "--prestatie":
                 self.PAD_CSV_PRESTATIES_ALGORITMEN = argv[i + 1].strip()
+
+                i += 2
+                continue
+
+            if argv[i] == "--algoritme":
+                self.MODUS_ALGORITME = argv[i + 1].strip()
+
+                i += 2
+                continue
+
+            if argv[i] == "--lussen":
+                self.AANTAL_LUSSEN = int(argv[i + 1])
+
+                i += 2
+                continue
 
             i += 1
 
@@ -66,7 +86,7 @@ class Roosterdata:
         """
         Geeft terug of het inlezen van alle csv-databestanden is geslaagd.
         """
-        return bool(self.VAKKEN and self.ZALEN and self.STUDENTEN)
+        return bool(self.VAKKEN and self.ZALEN and self.STUDENTEN and self.MODUS_ALGORITME and self.AANTAL_LUSSEN)
 
     def _alle_csv_bestanden_bestaan(self) -> bool:
         """
@@ -80,9 +100,6 @@ class Roosterdata:
 
         if not os.path.exists(self.__PAD_STUDENT_VAKKENDATA_CSV):
             return False
-
-        # if not os.path.exists(self.PAD_CSV_PRESTATIES_ALGORITMEN):
-        #     return False
 
         return True
 

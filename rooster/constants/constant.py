@@ -28,17 +28,22 @@ class Tekst:
             f"2. {Fore.YELLOW}--zalen{Style.RESET_ALL} <pad csv-bestand zalen>\n"
             f"3. {Fore.YELLOW}--sv{Style.RESET_ALL} <pad csv-bestand student-vakdata>\n"
             f"4. {Fore.YELLOW}--prestatie{Style.RESET_ALL} <pad csv-bestand student-vakdata>\n"
+            f"4. {Fore.YELLOW}--algoritme{Style.RESET_ALL} <type algoritme>\n"
+            f"4. {Fore.YELLOW}--lussen{Style.RESET_ALL} <het aantal lussen voor het algortime>\n"
+            
             f"\nVoorbeeld: {Fore.CYAN}python3.12 main.py {Fore.YELLOW}--vakken{Fore.CYAN} mnt/c/test/vakken.csv"
             f" {Fore.YELLOW}--zalen{Fore.CYAN} ./zalen.csv {Fore.YELLOW}"
-            f"--sv{Fore.CYAN} ../studentVak.csv {Style.RESET_ALL}"
-            f"{Fore.YELLOW}--resultaat{Fore.CYAN} ../roosterAlgoritme1.csv {Style.RESET_ALL}"
-            f"{Fore.YELLOW}--prestatie{Fore.CYAN} ../prestatiesAlgoritmen.csv {Style.RESET_ALL}\n\n"
+            f"--sv{Fore.CYAN} ../studentVak.csv"
+            f"{Fore.YELLOW}--resultaat{Fore.CYAN} ../roosterAlgoritme1.csv"
+            f"{Fore.YELLOW}--prestatie{Fore.CYAN} ../prestatiesAlgoritmen.csv"
+            f" {Fore.YELLOW}--lussen{Fore.CYAN} 1500"
+            f" {Fore.YELLOW}--algoritme{Fore.CYAN} hillclimbing {Style.RESET_ALL}\n\n"
         )
 
         self.KOLOMMEN_RESULTATEN_CSV: Final[str] = "naamStudent,vak,type,zaal,dag,tijdslot\n"
         self.KOLOMMEN_PRESTATIES_ALGORITMEN_CSV: Final[str] = (
-            "naamAlgoritme,dubbelIngeroosterd,tussentijdsloten,vakactiviteitenNietIngeroosterd,avond,"
-            "overvol,aantalLussen,totaal\n"
+            "naamAlgoritme,dubbelIngeroosterd,tussentijdsloten,vakNietIngeroosterd,avond,"
+            "overvol,aantalLussen,totaal,duurGenerenSeconden\n"
         )
 
 
@@ -58,7 +63,15 @@ class Tijdeenheid:
         self.TIJDSLOTEN: Final[tuple[str, ...]] = ("9.00–11.00", "11.00–13.00", "13.00–15.00", "15.00–17.00")
 
 
+class Algoritme:
+    __slots__: tuple[str, ...] = ("VALIDEN",)
+
+    def __init__(self) -> None:
+        self.VALIDEN: Final[tuple[str, ...]] = ("hillclimber", "deterministisch")
+
+
 maxima: Maxima = Maxima()
 teksten: Tekst = Tekst()
 returncodes: Returncode = Returncode()
 tijdeenheden: Tijdeenheid = Tijdeenheid()
+algoritmen: Algoritme = Algoritme()

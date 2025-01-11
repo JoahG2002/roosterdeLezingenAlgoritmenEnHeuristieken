@@ -3,11 +3,11 @@ import sys
 from rooster.modellen.roostermaker import Roostermaker
 from rooster.dataverwerking.lees import Roosterdata
 from rooster.dataverwerking.schrijf import schrijf_foutmelding
-from rooster.constants.constant import returncodes, teksten
+from rooster.constants.constant import returncodes, teksten, algoritmen
 
 
 def main(argc: int, argv: list[str]) -> None:
-    if not (argc == 11):
+    if not (argc == 15):
         schrijf_foutmelding(teksten.TOELICHTING_TEKORT_VLAGGEN)
         exit(returncodes.MISLUKT)
 
@@ -17,9 +17,13 @@ def main(argc: int, argv: list[str]) -> None:
         schrijf_foutmelding("minstens één van de opgegeven csv-bestandpaden bestaat niet.\n")
         exit(returncodes.MISLUKT)
 
+    if not (roosterdata.MODUS_ALGORITME in algoritmen.VALIDEN):
+        schrijf_foutmelding("ongeldig algoritme; programma gestopt.\n")
+        exit(returncodes.MISLUKT)
+
     roostermaker: Roostermaker = Roostermaker(roosterdata)
 
-    roostermaker.genereer_rooster(modus="deterministisch", aantal_lussen=1)
+    roostermaker.genereer_rooster()
 
     if not roostermaker.is_valide_rooster():
         sys.stderr.write("\nRooster invalide: niet iedere activiteit van ieder vak is ingeroosterd.\n\n")

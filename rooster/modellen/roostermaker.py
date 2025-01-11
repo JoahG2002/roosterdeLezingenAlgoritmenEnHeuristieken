@@ -1,4 +1,5 @@
 import sys
+import time
 import random
 
 from colorama import Fore, Style
@@ -12,14 +13,15 @@ from .activiteit import Activiteit
 from .strafpunt import BundelStrafpunten
 from .activiteit import Vakactiviteit
 from ..dataverwerking.lees import Roosterdata
-from ..constants.constant import returncodes, tijdeenheden, teksten
+from ..constants.constant import tijdeenheden, teksten
 
 
 class Roostermaker:
     __slots__: tuple[str, ...] = (
         "__ZALEN", "__vakken", "__TIJDSLOTEN", "__rooster", "__pad_resultaten_csv", "__studenten", "__strafpuntenbundel",
         "__aantal_ingeroosterde_tijdsloten", "__aantal_plaatsen_rooster", "__zaalsloten_ingeroosterd", "__index_zalen",
-        "__index_tijdsloten", "__modus_algoritme", "__aantal_lussen", "__pad_csv_prestaties_algoritmen"
+        "__index_tijdsloten", "__modus_algoritme", "__aantal_lussen", "__pad_csv_prestaties_algoritmen", "start_genereren",
+        "duur_genereren_seconden"
     )
 
     def __init__(self, roosterdata: Roosterdata) -> None:
@@ -28,6 +30,8 @@ class Roostermaker:
         self.__studenten: tuple[Student, ...] = roosterdata.STUDENTEN
         self.__pad_resultaten_csv: str = roosterdata.PAD_CSV_RESULTATEN
         self.__pad_csv_prestaties_algoritmen: str = roosterdata.PAD_CSV_PRESTATIES_ALGORITMEN
+        self.__modus_algoritme: str = roosterdata.MODUS_ALGORITME
+        self.__aantal_lussen: int = roosterdata.AANTAL_LUSSEN
 
         self.__TIJDSLOTEN: Final[tuple[Tijdslot, ...]] = (
             Tijdslot(weekdag="maandag", tijdstip="09.00–11.00"), Tijdslot(weekdag="maandag", tijdstip="11.00–13.00"),
@@ -54,9 +58,9 @@ class Roostermaker:
 
         self.__index_zalen: int = 0
         self.__index_tijdsloten: int = 0
-        self.__aantal_lussen: int = 0
 
-        self.__modus_algoritme: str = "onbekend"
+        self.start_genereren: float = 0.0
+        self.duur_genereren_seconden: float = 0.0
 
     @staticmethod
     def _sorteer_zalen(zalen: tuple[Zaal, ...]) -> tuple[Zaal, ...]:
@@ -109,27 +113,6 @@ class Roostermaker:
         self.__aantal_ingeroosterde_tijdsloten += 1
 
         self.__zaalsloten_ingeroosterd.add(activiteit.zaalslot)
-
-    # def rooster_activiteit_in(self, vakactiviteit: Vakactiviteit) -> Literal[0, -1]:
-    #     """
-    #     Poogt een activiteit in te roosteren, en geeft met een returncode terug of dit is gelukt.
-    #     """
-    #     for tijdslot in self.TIJDSLOTEN:
-    #         for zaal in self.__zalen:
-    #             zaalslot: Zaalslot = Zaalslot(tijdslot, zaal)
-    #
-    #             if self._is_al_ingeroosterd(zaalslot):
-    #                 continue
-    #
-    #             if not self._kan_faciliteren(zaal, vakactiviteit):
-    #                 continue
-    #
-    #             self._voeg_activiteit_toe_aan_rooster(zaalslot, vakactiviteit)
-    #             self._voeg_activiteit_toe_aan_rooster_studenten(zaalslot, vakactiviteit)
-    #
-    #             return returncodes.SUCCES
-    #
-    #     return returncodes.MISLUKT
 
     @staticmethod
     def _verdeel_studenten_over_werkgroepen(totaalaantal_studenten: int, maximumaantal_studenten_groep: int) -> list[int]:
@@ -252,20 +235,100 @@ class Roostermaker:
                     aantal_studenten_per_activiteit_=aantal_studenten_per_activiteit
                 )
 
-    def genereer_rooster(self,
-                         modus: Literal["deterministisch", "hillcimber"],
-                         aantal_lussen: int) -> None:
+    def _geneer_rooster_hillclimbing(self) -> None:
+        """
+        Geneert een n-aantal rooster met, en geeft het beste rooster uit dat n-aantal terug — hillclimbing ('bergklimmen').
+        """
+        def verwissel_activiteiten(index_activiteit1: int, index_activiteit2: int) -> None:
+            """
+            Verwisselt de posities van twee activiteiten.
+            """
+            tijdelijke_container_activiteit: Activiteit = self.__rooster[index_activiteit1]
+            self.__rooster[index_activiteit1] = self.__rooster[index_activiteit2]
+            self.__rooster[index_activiteit2] = tijdelijke_container_activiteit
+
+            if self.__rooster[index_activiteit1]:
+                self.__zaalsloten_ingeroosterd.add(self.__rooster[index_activiteit1].zaalslot)
+            if self.__rooster[index_activiteit2]:
+                self.__zaalsloten_ingeroosterd.add(self.__rooster[index_activiteit2].zaalslot)
+
+        def is_valide_wissel(index_activiteit1: int, index_activiteit2: int) -> bool:
+            """
+            Geeft terug of een positiewissel geldig is.
+            """
+            activiteit1: Activiteit = self.__rooster[index_activiteit1]
+            activiteit2: Activiteit = self.__rooster[index_activiteit2]
+
+            if (activiteit1 is None) or (activiteit2 is None):
+                return True
+
+            zaal1: Zaal = self.__rooster[index_activiteit1].zaalslot.zaal
+            zaal2: Zaal = self.__rooster[index_activiteit2].zaalslot.zaal
+
+            if not self._kan_faciliteren(zaal1, activiteit1.vakactiviteit):
+                return False
+            if not self._kan_faciliteren(zaal2, activiteit2.vakactiviteit):
+                return False
+
+            return True
+
+        def bereken_strafpunten_lus() -> int:
+            """
+            Berekent het aantal strafpunten van de huidige lus.
+            """
+            self._bereken_strafpunten()
+
+            return self.__strafpuntenbundel.totaal()
+
+        huidig_aantal_strafpunten: int = bereken_strafpunten_lus()
+        minste_aantal_strafpunten: int = huidig_aantal_strafpunten
+        beste_rooster: list[Activiteit | None] = self.__rooster[:]
+
+        for lus in range(self.__aantal_lussen):
+            willekeurige_index1: int = random.randint(0, (self.__aantal_plaatsen_rooster - 1))
+            willekeurige_index2: int = random.randint(0, (self.__aantal_plaatsen_rooster - 1))
+
+            if not is_valide_wissel(willekeurige_index1, willekeurige_index2):
+                continue
+
+            verwissel_activiteiten(willekeurige_index1, willekeurige_index2)
+
+            vorige_rooster: list[Activiteit | None] = self.__rooster[:]
+            vorige_zaalsloten: set[Zaalslot] = self.__zaalsloten_ingeroosterd.copy()
+
+            nieuw_aantal_strafpunten: int = bereken_strafpunten_lus()
+
+            if nieuw_aantal_strafpunten < huidig_aantal_strafpunten:
+                huidig_aantal_strafpunten = nieuw_aantal_strafpunten
+
+                if nieuw_aantal_strafpunten < minste_aantal_strafpunten:
+                    minste_aantal_strafpunten = nieuw_aantal_strafpunten
+                    beste_rooster = self.__rooster[:]
+
+                    sys.stdout.write(
+                        f"\nRooster verbeterd! Huidige aantal strafpunten:"
+                        f" {Fore.GREEN}{nieuw_aantal_strafpunten}{Style.RESET_ALL}\n"
+                    )
+
+                continue
+
+            self.__rooster = vorige_rooster
+            self.__zaalsloten_ingeroosterd = vorige_zaalsloten
+
+        self.__rooster = beste_rooster
+        self._bereken_strafpunten()
+
+    def genereer_rooster(self) -> None:
         """
         Genereert een rooster voor een gegeven tuple vakactiviteiten.
         """
-        self.__modus_algoritme = modus
-        self.__aantal_lussen: int = aantal_lussen
+        self.start_genereren = time.time()
+        self._genereer_basisrooster()
 
-        if modus == "deterministisch":
-            self._genereer_basisrooster()
+        if self.__modus_algoritme == "hillclimber":
+            self._geneer_rooster_hillclimbing()
 
-        if modus == "hillclimber":
-            self._genereer_basisrooster()
+        self.duur_genereren_seconden = (time.time() - self.start_genereren)
 
     def is_valide_rooster(self) -> bool:
         """
@@ -304,9 +367,6 @@ class Roostermaker:
         """
         Berekent het aantal strafpunten van de huidige roosterconfiguratie terug als bundel strafpuntcategoriën
         """
-        if self.__strafpuntenbundel:
-            return
-
         self.__strafpuntenbundel: BundelStrafpunten = BundelStrafpunten(studenten=self.__studenten, rooster=self.__rooster)
 
     def print_strafpunten(self) -> None:
@@ -338,7 +398,7 @@ class Roostermaker:
                 f"{self.__modus_algoritme},{self.__strafpuntenbundel.dubbel_ingeroosterd},"
                 f"{self.__strafpuntenbundel.roostergaten},{self.__strafpuntenbundel.ongebruikte_tijdsloten},"
                 f"{self.__strafpuntenbundel.avondactiviteiten},{self.__strafpuntenbundel.overvolle_zalen},"
-                f"{self.__aantal_lussen},{self.__strafpuntenbundel.totaal()}\n"
+                f"{self.__aantal_lussen},{self.__strafpuntenbundel.totaal()},{self.duur_genereren_seconden}\n"
             )
 
     def naar_csv(self) -> None:
