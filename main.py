@@ -20,9 +20,12 @@ def main(argc: int, argv: list[str]) -> None:
     roostermaker: Roostermaker = Roostermaker(roosterdata)
 
     roostermaker.genereer_rooster(modus="deterministisch", aantal_lussen=1)
-    # roostermaker.prestatie_algoritme_naar_csv()
+
     roostermaker.print_rooster()
+
     # roostermaker.print_alle_studentroosters()
+
+    roostermaker.prestatie_algoritme_naar_csv()
     roostermaker.naar_csv()
 
     roostermaker.print_strafpunten()
