@@ -429,32 +429,34 @@ class Roostermaker:
 
             temperature: float = c.bereken_temperatuur(
                 c_double(lus),
-                c_double(aantal_lussen_double),
+                aantal_lussen_double,
                 c_double(aanvankelijke_temperatuur)
             )
-
-            if c.accepteer_slechtste_oplossing(
+ 
+            if not c.accepteer_slechtste_oplossing(
                     c_double(huidig_aantal_strafpunten),
                     c_double(nieuw_aantal_strafpunten),
                     c_double(temperature),
                     c_double(random.random())
             ):
-                huidig_aantal_strafpunten = nieuw_aantal_strafpunten
+                continue
 
-                self.__rooster = deepcopy(rooster_huidige_lus)
-                self.__zaalsloten_ingeroosterd = deepcopy(zaalsloten_huidige_lus)
-                self.__studenten = deepcopy(studenten_huidige_lus)
-                self.__vakken = tuple(vakken_huidige_lus)
+            huidig_aantal_strafpunten = nieuw_aantal_strafpunten
 
-                if nieuw_aantal_strafpunten < laagste_aantal_strafpunten:
-                    laagste_aantal_strafpunten = nieuw_aantal_strafpunten
+            self.__rooster = deepcopy(rooster_huidige_lus)
+            self.__zaalsloten_ingeroosterd = deepcopy(zaalsloten_huidige_lus)
+            self.__studenten = deepcopy(studenten_huidige_lus)
+            self.__vakken = tuple(vakken_huidige_lus)
 
-                    beste_rooster = deepcopy(rooster_huidige_lus)
-                    zaalsloten_beste_rooster = deepcopy(zaalsloten_huidige_lus)
-                    studenten_beste_rooster = deepcopy(studenten_huidige_lus)
-                    vakken_beste_rooster = deepcopy(vakken_huidige_lus)
+            if nieuw_aantal_strafpunten < laagste_aantal_strafpunten:
+                laagste_aantal_strafpunten = nieuw_aantal_strafpunten
 
-                    schrijf_voortgang_algoritme(nieuw_aantal_strafpunten, lus, self.__aantal_lussen)
+                beste_rooster = deepcopy(rooster_huidige_lus)
+                zaalsloten_beste_rooster = deepcopy(zaalsloten_huidige_lus)
+                studenten_beste_rooster = deepcopy(studenten_huidige_lus)
+                vakken_beste_rooster = deepcopy(vakken_huidige_lus)
+
+                schrijf_voortgang_algoritme(nieuw_aantal_strafpunten, lus, self.__aantal_lussen)
 
         self.__rooster = beste_rooster
         self.__zaalsloten_ingeroosterd = zaalsloten_beste_rooster

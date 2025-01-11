@@ -1,9 +1,9 @@
 #include <math.h>
-#include <stdbool.h>
+#include <stdint.h>
 
 
 double bereken_temperatuur(const double lus, const double totaalaantal_lussen, const double aanvankelijke_temperatuur);
-bool accepteer_slechtste_oplossing(const double vorig_aantal_strafpunten,
+uint8_t accepteer_slechtste_oplossing(const double vorig_aantal_strafpunten,
                                    const double nieuw_aantal_strafpunten,
                                    const double temperature,
                                    const double willekeurige_waarde_tussen_0_1);
@@ -21,17 +21,17 @@ double bereken_temperatuur(const double lus, const double totaalaantal_lussen, c
 
 /**
  * @brief Geeft terug of de slechtste oplossing moet worden aangenomen op basis van de huidige temperatuur.
- * @return double.
+ * @return uint8_t (always 0 or 1).
  */
-bool accepteer_slechtste_oplossing(const double vorig_aantal_strafpunten,
+uint8_t accepteer_slechtste_oplossing(const double vorig_aantal_strafpunten,
                                    const double nieuw_aantal_strafpunten,
                                    const double temperature,
                                    const double willekeurige_waarde_tussen_0_1)
 {
     if (vorig_aantal_strafpunten > nieuw_aantal_strafpunten)
-        return true;
+        return 1;
 
     double kans = exp((vorig_aantal_strafpunten - nieuw_aantal_strafpunten) / temperature);
 
-    return (willekeurige_waarde_tussen_0_1 < kans);
+    return (willekeurige_waarde_tussen_0_1 < kans) ? 1 : 0;
 }

@@ -44,7 +44,7 @@ class Tekst:
             f" {Fore.YELLOW}--algoritme{Fore.CYAN} hillclimbing {Style.RESET_ALL}\n\n"
         )
         self.CSV_BESTAAT_NIET: Final[str] = "minstens één van de opgegeven csv-bestandpaden bestaat niet.\n"
-        self.ONGELDIG_ALGORITME: Final[str] = f"ongeldig algoritme; programma gestopt. Kies uit: {Algoritme.VALIDEN}\n"
+        self.ONGELDIG_ALGORITME: Final[str] = f"ongeldig algoritme; programma gestopt. Kies uit: {Algoritme().VALIDEN}\n\n"
 
         self.KOLOMMEN_RESULTATEN_CSV: Final[str] = "naamStudent,vak,type,zaal,dag,tijdslot\n"
         self.KOLOMMEN_PRESTATIES_ALGORITMEN_CSV: Final[str] = (
