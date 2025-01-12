@@ -27,6 +27,8 @@ Voorbeeld: `python3.12 main.py --vakken ./data/vakken.csv --zalen ./data/zalen.c
 5. `--algoritme` <type algoritme>;
 6. `--lussen` <het aantal lussen voor het algortime>.
 
+Kiest uit de volgende algoritmen: `"hillclimber", "deterministisch", "simulatedAnnealing", "genetisch"`.
+
 # Optioneel
 Mocht u het nodig vinden de C-programma's te hercompileren, dan kan dat in deze volgorde (`main.py` houdt automatisch rekening met het besturingssysteem).
 1. `gcc -O3 -fPIC -c reken.c -o reken.o -Wall -Werror`
