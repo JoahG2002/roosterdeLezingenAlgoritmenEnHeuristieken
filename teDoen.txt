@@ -20,7 +20,9 @@ simulated annealing:
 
 Een geldig weekrooster is een weekrooster waarvoor aan alle roosterbare activiteiten van ieder vak een tijdsslot met een zaal hebben. We noemen het paar tijdsslot-zaal een zaalslot.
 
-20-46,100 strafpunten
+mogelijk: 20-46,100 strafpunten
+
+wat te doen met drie * 2 tussentijdsloten?
 
 Genetic algorithm 
 Planned propagation

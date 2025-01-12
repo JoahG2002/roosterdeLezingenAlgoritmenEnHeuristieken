@@ -432,7 +432,7 @@ class Roostermaker:
                 aantal_lussen_double,
                 c_double(aanvankelijke_temperatuur)
             )
- 
+
             if not c.accepteer_slechtste_oplossing(
                     c_double(huidig_aantal_strafpunten),
                     c_double(nieuw_aantal_strafpunten),
