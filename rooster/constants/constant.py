@@ -73,7 +73,7 @@ class Algoritme:
     __slots__: tuple[str, ...] = ("VALIDEN",)
 
     def __init__(self) -> None:
-        self.VALIDEN: Final[tuple[str, ...]] = ("hillclimber", "deterministisch", "simulatedAnnealing")
+        self.VALIDEN: Final[tuple[str, ...]] = ("hillclimber", "deterministisch", "simulatedAnnealing", "genetisch")
 
 
 class ShareLibraryFunctie:

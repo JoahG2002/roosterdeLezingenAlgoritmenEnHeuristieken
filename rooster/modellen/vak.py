@@ -60,14 +60,19 @@ class Vak:
         Verwijdert een zaalslot uit het vaks ingeroosterd zaalsloten.
         """
         if type_activiteit == "hoorcollege":
-            self.__hoorcolleges.remove(zaalslot)
+            if zaalslot in self.__hoorcolleges:
+                self.__hoorcolleges.remove(zaalslot)
+
             return
 
         if type_activiteit == "werkcollege":
-            self.__werkcolleges.remove(zaalslot)
+            if zaalslot in self.__werkcolleges:
+                self.__werkcolleges.remove(zaalslot)
+
             return
 
-        self.__practica.remove(zaalslot)
+        if zaalslot in self.__practica:
+            self.__practica.remove(zaalslot)
 
     def geef_aantal_studenten_per_niet_hoorcollege(self, voor_werkcollege: bool) -> int:
         """

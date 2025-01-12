@@ -13,8 +13,9 @@ from .student import Student
 from .tijdslot import Tijdslot
 from .zaal import Zaal, Zaalslot
 from .activiteit import Activiteit
-from .strafpunt import BundelStrafpunten
 from .activiteit import Vakactiviteit
+from .genetisch import GenetischRooster
+from .strafpunt import BundelStrafpunten
 from ..dataverwerking.lees import Roosterdata
 from ..constants.constant import tijdeenheden, teksten
 from ..dataverwerking.schrijf import schrijf_voortgang_algoritme
@@ -36,7 +37,7 @@ class Roostermaker:
 
         self.__pad_resultaten_csv: str = roosterdata.PAD_CSV_RESULTATEN
         self.__pad_csv_prestaties_algoritmen: str = roosterdata.PAD_CSV_PRESTATIES_ALGORITMEN
-        self.__modus_algoritme: Literal["deterministisch", "hillclimber", "simulatedAnnealing", ''] = roosterdata.MODUS_ALGORITME
+        self.__modus_algoritme: Literal["deterministisch", "hillclimber", "simulatedAnnealing", "genetisch", ''] = roosterdata.MODUS_ALGORITME
         self.__aantal_lussen: int = roosterdata.AANTAL_LUSSEN
 
         self.__TIJDSLOTEN: Final[tuple[Tijdslot, ...]] = (
@@ -240,7 +241,7 @@ class Roostermaker:
                 )
 
     @staticmethod
-    def _geef_willekeurige_beweging(rooster: list[Activiteit | None]) -> Optional[tuple[Activiteit, Activiteit]]:
+    def _geef_willekeurige_wissel(rooster: list[Activiteit | None]) -> Optional[tuple[Activiteit, Activiteit]]:
         """
         Kiest twee willekeurige activiteiten uit het rooster voor een zaalslot wissel.
         """
@@ -270,65 +271,67 @@ class Roostermaker:
                 break
 
     def _verwissel_activiteiten(self,
-                                activiteit1_: Activiteit,
-                                activiteit2_: Activiteit,
+                                activiteit1: Activiteit,
+                                activiteit2: Activiteit,
                                 zaalsloten_ingeroosterd: set[Zaalslot],
                                 rooster: list[Activiteit | None],
-                                studenten_: set[Student],
+                                studenten: set[Student],
                                 vakken: list[Vak]) -> None:
         """
         Verwisselt de zaalsloten van twee activiteiten.
         """
-        zaalsloten_ingeroosterd.remove(activiteit1_.zaalslot)
-        zaalsloten_ingeroosterd.remove(activiteit2_.zaalslot)
+        if activiteit1.zaalslot in zaalsloten_ingeroosterd:
+            zaalsloten_ingeroosterd.remove(activiteit1.zaalslot)
+        if activiteit2.zaalslot in zaalsloten_ingeroosterd:
+            zaalsloten_ingeroosterd.remove(activiteit2.zaalslot)
 
-        for student in studenten_:
-            student.verwijder_zaalslot(activiteit1_.zaalslot)
-            student.verwijder_zaalslot(activiteit2_.zaalslot)
-
-        for vak in vakken:
-            if vak.naam == activiteit1_.vakactiviteit.vak.naam:
-                vak.verwijder_zaalslot(activiteit1_.zaalslot, activiteit1_.vakactiviteit.type)
-
-            if vak.naam == activiteit2_.vakactiviteit.vak.naam:
-                vak.verwijder_zaalslot(activiteit2_.zaalslot, activiteit2_.vakactiviteit.type)
-
-        bezette_plaatsen_zaal_activiteit1: int = activiteit1_.zaalslot.zaal.bezette_plaatsen
-        bezette_plaatsen_zaal_activiteit2: int = activiteit2_.zaalslot.zaal.bezette_plaatsen
-
-        tijdelijke_container_zaalslot: Zaalslot = activiteit1_.zaalslot
-        activiteit1_.zaalslot = activiteit2_.zaalslot
-        activiteit2_.zaalslot = tijdelijke_container_zaalslot
-
-        activiteit1_.zaalslot.zaal.bezette_plaatsen = bezette_plaatsen_zaal_activiteit1
-        activiteit2_.zaalslot.zaal.bezette_plaatsen = bezette_plaatsen_zaal_activiteit2
-
-        self._update_activiteit_in_rooster(rooster, activiteit1_)
-        self._update_activiteit_in_rooster(rooster, activiteit2_)
-
-        zaalsloten_ingeroosterd.add(activiteit1_.zaalslot)
-        zaalsloten_ingeroosterd.add(activiteit2_.zaalslot)
-
-        for student in studenten_:
-            if student.volgt_vak(activiteit1_.vakactiviteit.vak.naam):
-                student.voeg_activiteit_toe_aan_rooster(activiteit1_)
-
-            if student.volgt_vak(activiteit2_.vakactiviteit.vak.naam):
-                student.voeg_activiteit_toe_aan_rooster(activiteit2_)
+        for student in studenten:
+            student.verwijder_zaalslot(activiteit1.zaalslot)
+            student.verwijder_zaalslot(activiteit2.zaalslot)
 
         for vak in vakken:
-            if vak.naam == activiteit1_.vakactiviteit.vak.naam:
-                vak.voegt_zaalslot_toe(activiteit1_.zaalslot, activiteit1_.vakactiviteit.type)
+            if vak.naam == activiteit1.vakactiviteit.vak.naam:
+                vak.verwijder_zaalslot(activiteit1.zaalslot, activiteit1.vakactiviteit.type)
 
-            if vak.naam == activiteit2_.vakactiviteit.vak.naam:
-                vak.voegt_zaalslot_toe(activiteit2_.zaalslot, activiteit2_.vakactiviteit.type)
+            if vak.naam == activiteit2.vakactiviteit.vak.naam:
+                vak.verwijder_zaalslot(activiteit2.zaalslot, activiteit2.vakactiviteit.type)
 
-    def _is_valide_zaalwissel(self, activiteit1_: Activiteit, activiteit2_: Activiteit) -> bool:
+        bezette_plaatsen_zaal_activiteit1: int = activiteit1.zaalslot.zaal.bezette_plaatsen
+        bezette_plaatsen_zaal_activiteit2: int = activiteit2.zaalslot.zaal.bezette_plaatsen
+
+        tijdelijke_container_zaalslot: Zaalslot = activiteit1.zaalslot
+        activiteit1.zaalslot = activiteit2.zaalslot
+        activiteit2.zaalslot = tijdelijke_container_zaalslot
+
+        activiteit1.zaalslot.zaal.bezette_plaatsen = bezette_plaatsen_zaal_activiteit1
+        activiteit2.zaalslot.zaal.bezette_plaatsen = bezette_plaatsen_zaal_activiteit2
+
+        self._update_activiteit_in_rooster(rooster, activiteit1)
+        self._update_activiteit_in_rooster(rooster, activiteit2)
+
+        zaalsloten_ingeroosterd.add(activiteit1.zaalslot)
+        zaalsloten_ingeroosterd.add(activiteit2.zaalslot)
+
+        for student in studenten:
+            if student.volgt_vak(activiteit1.vakactiviteit.vak.naam):
+                student.voeg_activiteit_toe_aan_rooster(activiteit1)
+
+            if student.volgt_vak(activiteit2.vakactiviteit.vak.naam):
+                student.voeg_activiteit_toe_aan_rooster(activiteit2)
+
+        for vak in vakken:
+            if vak.naam == activiteit1.vakactiviteit.vak.naam:
+                vak.voegt_zaalslot_toe(activiteit1.zaalslot, activiteit1.vakactiviteit.type)
+
+            if vak.naam == activiteit2.vakactiviteit.vak.naam:
+                vak.voegt_zaalslot_toe(activiteit2.zaalslot, activiteit2.vakactiviteit.type)
+
+    def _is_valide_zaalwissel(self, activiteit1: Activiteit, activiteit2: Activiteit) -> bool:
         """
         Geeft terug of een zaalwissel geldig is – of zalen van beide activiteiten elkaars capaciteit in aan zouden kunnen bij een mogelijke wissel.
         """
-        return (self._kan_faciliteren(activiteit1_.zaalslot.zaal, activiteit2_.vakactiviteit)
-                and self._kan_faciliteren(activiteit2_.zaalslot.zaal, activiteit1_.vakactiviteit))
+        return (self._kan_faciliteren(activiteit1.zaalslot.zaal, activiteit2.vakactiviteit)
+                and self._kan_faciliteren(activiteit2.zaalslot.zaal, activiteit1.vakactiviteit))
 
     def _geneer_rooster_hillclimbing(self) -> None:
         """
@@ -348,7 +351,7 @@ class Roostermaker:
             studenten_huidige_lus: set[Student] = deepcopy(studenten_beste_rooster)
             vakken_huidige_lus: list[Vak] = deepcopy(vakken_beste_rooster)
 
-            activiteitenwissel: tuple[Activiteit, Activiteit] | None = self._geef_willekeurige_beweging(rooster_huidige_lus)
+            activiteitenwissel: tuple[Activiteit, Activiteit] | None = self._geef_willekeurige_wissel(rooster_huidige_lus)
 
             if not activiteitenwissel:
                 continue
@@ -359,11 +362,11 @@ class Roostermaker:
                 continue
 
             self._verwissel_activiteiten(
-                activiteit1_=activiteit1,
-                activiteit2_=activiteit2,
+                activiteit1=activiteit1,
+                activiteit2=activiteit2,
                 zaalsloten_ingeroosterd=zaalsloten_huidige_lus,
                 rooster=rooster_huidige_lus,
-                studenten_=studenten_huidige_lus,
+                studenten=studenten_huidige_lus,
                 vakken=vakken_huidige_lus
             )
 
@@ -406,7 +409,7 @@ class Roostermaker:
             studenten_huidige_lus: set[Student] = deepcopy(self.__studenten)
             vakken_huidige_lus: list[Vak] = deepcopy(list(self.__vakken))
 
-            activiteitenwissel: tuple[Activiteit, Activiteit] | None = self._geef_willekeurige_beweging(rooster_huidige_lus)
+            activiteitenwissel: tuple[Activiteit, Activiteit] | None = self._geef_willekeurige_wissel(rooster_huidige_lus)
 
             if not activiteitenwissel:
                 continue
@@ -417,11 +420,11 @@ class Roostermaker:
                 continue
 
             self._verwissel_activiteiten(
-                activiteit1_=activiteit1,
-                activiteit2_=activiteit2,
+                activiteit1=activiteit1,
+                activiteit2=activiteit2,
                 zaalsloten_ingeroosterd=zaalsloten_huidige_lus,
                 rooster=rooster_huidige_lus,
-                studenten_=studenten_huidige_lus,
+                studenten=studenten_huidige_lus,
                 vakken=vakken_huidige_lus
             )
 
@@ -463,6 +466,142 @@ class Roostermaker:
         self.__studenten = studenten_beste_rooster
         self.__vakken = tuple(vakken_beste_rooster)
 
+    def _genereer_rooster_genetisch(self) -> None:
+        """
+        Genereert een rooster vanuit een genetische benadering:
+
+        1. creëert eem aanvankelijke populatie valide roosters;
+        2. evalueert deze vervolgens aan de hand van strafpunten;
+        3. kiest de roosters met de beste 'genen';
+        4. creëert een mixmutatie van deze roosters;
+        5. herhaalt dit tot het n-aantal lussen.
+        """
+        POPULATIEGROOTTE: int = 50
+        GROOTTE_ELITE: int = 5
+        MUTATIETEMPO: float = 0.1
+
+        def creeer_los_rooster() -> GenetischRooster:
+            """
+            Creëert een willekeurig, geldig rooster middels mutaties van het huidige rooster.
+            """
+            new_rooster: list[Activiteit | None] = deepcopy(self.__rooster)
+            new_zaalsloten: set[Zaalslot] = deepcopy(self.__zaalsloten_ingeroosterd)
+            new_studenten: set[Student] = deepcopy(self.__studenten)
+            new_vakken: list[Vak] = deepcopy(list(self.__vakken))
+
+            for _ in range(int(len(new_rooster) * MUTATIETEMPO)):
+                activiteitenwissel_: tuple[Activiteit, Activiteit] | None= self._geef_willekeurige_wissel(new_rooster)
+
+                if not activiteitenwissel_:
+                    continue
+
+                activiteit1_, activiteit2_ = activiteitenwissel_
+
+                if not self._is_valide_zaalwissel(activiteit1_, activiteit2_):
+                    continue
+
+                self._verwissel_activiteiten(
+                    activiteit1=activiteit1_,
+                    activiteit2=activiteit2_,
+                    zaalsloten_ingeroosterd=new_zaalsloten,
+                    rooster=new_rooster,
+                    studenten=new_studenten,
+                    vakken=new_vakken
+                )
+
+            return GenetischRooster(new_rooster, new_zaalsloten, new_studenten, new_vakken)
+
+        def berekent_strafpunten(roosterdata: GenetischRooster) -> int:
+            """
+            Evalueert de geschiktheid middels het strafpuntensysteem (negatieve straffen voor betere geschiktheid).
+            """
+            return -1 * BundelStrafpunten(roosterdata.studenten, roosterdata.rooster).totaal()
+
+        def muteer_roosters(data_ouderrooster1: GenetischRooster, data_ouderrooster2: GenetischRooster) -> GenetischRooster:
+            """
+            Creëert een nieuw rooster uit twee ouderroosters.
+            """
+            kindrooster: list[Activiteit | None] = deepcopy(data_ouderrooster1.rooster)
+            zaalsloten_kindrooster: set[Zaalslot] = deepcopy(data_ouderrooster1.zaalsloten)
+            studenten_kindrooster: set[Student] = deepcopy(data_ouderrooster1.studenten)
+            vakken_kinderrooster: list[Vak] = deepcopy(data_ouderrooster1.vakken)
+
+            for i in range(len(kindrooster)):
+                if (random.random() < 0.5) and data_ouderrooster2.rooster[i]:
+                    if kindrooster[i]:
+                        oude_activiteit: Activiteit = kindrooster[i]
+
+                        if oude_activiteit.zaalslot in zaalsloten_kindrooster:
+                            zaalsloten_kindrooster.remove(oude_activiteit.zaalslot)
+
+                        for student in studenten_kindrooster:
+                            student.verwijder_zaalslot(oude_activiteit.zaalslot)
+
+                    nieuwe_activiteit: Activiteit = deepcopy(data_ouderrooster2.rooster[i])
+                    kindrooster[i] = nieuwe_activiteit
+
+                    zaalsloten_kindrooster.add(nieuwe_activiteit.zaalslot)
+
+                    for student in studenten_kindrooster:
+                        if student.volgt_vak(nieuwe_activiteit.vakactiviteit.vak.naam):
+                            student.voeg_activiteit_toe_aan_rooster(nieuwe_activiteit)
+
+            return GenetischRooster(kindrooster, zaalsloten_kindrooster, studenten_kindrooster, vakken_kinderrooster)
+
+        populaties: list[GenetischRooster] = [creeer_los_rooster() for _ in range(POPULATIEGROOTTE)]
+
+        beste_rooster: GenetischRooster | None = None
+        beste_geschiktheid: int = -500_000
+
+        for generatie in range(self.__aantal_lussen):
+            roosters_met_geschiktheid: list[tuple[GenetischRooster, int]] = [
+                (rooster, berekent_strafpunten(rooster)) for rooster in populaties
+            ]
+            roosters_met_geschiktheid.sort(key=lambda x: x[1], reverse=True)
+
+            if roosters_met_geschiktheid[0][1] > beste_geschiktheid:
+                beste_geschiktheid = roosters_met_geschiktheid[0][1]
+                beste_rooster = roosters_met_geschiktheid[0][0]
+
+                schrijf_voortgang_algoritme(-beste_geschiktheid, generatie, self.__aantal_lussen)
+
+            nieuwe_populaties: list[GenetischRooster] = [rooster for rooster, _ in roosters_met_geschiktheid[:GROOTTE_ELITE]]
+
+            while len(nieuwe_populaties) < POPULATIEGROOTTE:
+                willekeurige_roosters: list[GenetischRooster] = random.sample(roosters_met_geschiktheid, 5)
+                ouderrooster1: GenetischRooster = max(willekeurige_roosters, key=lambda x: x[1])[0]
+
+                willekeurige_roosters = random.sample(roosters_met_geschiktheid, 5)
+                ouderrooster2: GenetischRooster = max(willekeurige_roosters, key=lambda x: x[1])[0]
+
+                kindrooster_: GenetischRooster = muteer_roosters(ouderrooster1, ouderrooster2)
+
+                if random.random() < MUTATIETEMPO:
+                    activiteitenwissel: tuple[Activiteit, Activiteit] | None = self._geef_willekeurige_wissel(kindrooster_.rooster)
+
+                    if activiteitenwissel:
+                        activiteit1, activiteit2 = activiteitenwissel
+
+                        if self._is_valide_zaalwissel(activiteit1, activiteit2):
+                            self._verwissel_activiteiten(
+                                activiteit1=activiteit1,
+                                activiteit2=activiteit2,
+                                zaalsloten_ingeroosterd=kindrooster_.zaalsloten,
+                                rooster=kindrooster_.rooster,
+                                studenten=kindrooster_.studenten,
+                                vakken=kindrooster_.vakken
+                            )
+
+                nieuwe_populaties.append(kindrooster_)
+
+            populaties = nieuwe_populaties
+
+        if beste_rooster:
+            self.__rooster = beste_rooster.rooster
+            self.__zaalsloten_ingeroosterd = beste_rooster.zaalsloten
+            self.__studenten = beste_rooster.studenten
+            self.__vakken = beste_rooster.vakken
+
     def genereer_rooster(self) -> None:
         """
         Genereert een rooster voor een gegeven tuple vakactiviteiten.
@@ -477,6 +616,9 @@ class Roostermaker:
 
         if self.__modus_algoritme == "simulatedAnnealing":
             self._genereer_rooster_simulated_annealing()
+
+        if self.__modus_algoritme == "genetisch":
+            self._genereer_rooster_genetisch()
 
         self._bereken_strafpunten()
 

@@ -21,7 +21,7 @@ class Roosterdata:
         self.__PAD_ZAALDATA_CSV: str = ''
         self.__PAD_STUDENT_VAKKENDATA_CSV: str = ''
         self.PAD_CSV_RESULTATEN: str = ''
-        self.MODUS_ALGORITME: Literal["deterministisch", "hillclimber", "simulatedAnnealing", ''] = ''
+        self.MODUS_ALGORITME: Literal["deterministisch", "hillclimber", "simulatedAnnealing", "genetisch", ''] = ''
         self.AANTAL_LUSSEN: int = 0
 
         self.VAKKEN: tuple[Vak, ...] | None = None
