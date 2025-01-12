@@ -1,9 +1,8 @@
 - een geldig weekrooster: alle roosterbare activiteiten van ieder vak hebben een tijdsslot met een zaal hebben. Het paar tijdsslot-zaal een zaalslot.
-- processen, threads?
 
-meerdere cores
+meerdere cores?
 
-python3.12 main.py --vakken ./data/vakken.csv --zalen ./data/zalen.csv --sv ./data/studenten_en_vakken.csv --resultaat ./data/roosterHillclimber.csv --prestatie ./data/prestatiesAlgoritmen.csv --lussen 15 --algoritme hillclimbing
+python3.12 main.py --vakken ./data/vakken.csv --zalen ./data/zalen.csv --sv ./data/studenten_en_vakken.csv --resultaat ./data/roosterHillclimber.csv --prestatie ./data/prestatiesAlgoritmen.csv --lussen 10 --algoritme genetisch
 
 VISUALISATIE
 rood if waarde > X
@@ -11,12 +10,15 @@ beste algoritme*
 
 geem werlcollege op dezelfde dag, niet per se nodig
 
-deterministisch: 
+deterministisch: matig, maar dan kan niet anders. 
 deterministishV2: lette op ruimtecapaciteit en sorteerde de zalen van groot naar klein, i.p.v. vice versa
 hillclimberV1: posities rooster wisselen doet niets. zaalsloten
 hillclimberV2: zaalsloten verwisselen: het werkt! 
 hillclimberShuffleVakkenZalen: vrij goed, zalen, vakken naar list -> shuffle
-simulated annealing: 
+simulated annealing: niet veel beter
+genetisch: traag, maar het beste 1538
+
+hillclimber 's nachts.
 
 Een geldig weekrooster is een weekrooster waarvoor aan alle roosterbare activiteiten van ieder vak een tijdsslot met een zaal hebben. We noemen het paar tijdsslot-zaal een zaalslot.
 
@@ -24,7 +26,6 @@ mogelijk: 20-46,100 strafpunten
 
 wat te doen met drie * 2 tussentijdsloten?
 
-Genetic algorithm 
 Planned propagation
 
 requirements.txt
