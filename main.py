@@ -1,9 +1,9 @@
 import sys
 
-from rooster.modellen.roostermaker import Roostermaker
 from rooster.dataverwerking.lees import Roosterdata
+from rooster.modellen.roostermaker import Roostermaker
 from rooster.dataverwerking.schrijf import schrijf_foutmelding
-from rooster.constants.constant import returncodes, teksten, algoritmen
+from rooster.constanten.constant import returncodes, teksten, algoritmen
 
 
 def main(argc: int, argv: list[str]) -> None:
