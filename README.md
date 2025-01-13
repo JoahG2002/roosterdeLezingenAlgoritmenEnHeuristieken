@@ -27,7 +27,16 @@ Voorbeeld: `python3.12 main.py --vakken ./data/vakken.csv --zalen ./data/zalen.c
 5. `--algoritme` <type algoritme>;
 6. `--lussen` <het aantal lussen voor het algortime>.
 
-Kiest uit de volgende algoritmen: `"hillclimber", "deterministisch", "simulatedAnnealing", "genetisch"`.
+Kiest uit de volgende algoritmen: 
+ - `"hillclimber"`: geneert een n-aantal rooster door willekeurige zaalsloten te wisselen, en geeft het beste rooster uit dat n-aantal terug — hillclimbing ('bergklimmen');
+- `"deterministisch"`: genereert een rooster door gebruik te maken van simulated annealing. Deze methode staat slechte oplossingen toe met een kans die naarmate tijd vordert afneemt. Uiteindelijk wordt hierdoor een optimale staat bereikt;
+- `"simulatedAnnealing"`: genereert een rooster door gebruik te maken van simulated annealing. Deze methode staat slechte oplossingen toe met een kans die naarmate tijd vordert afneemt. Uiteindelijk wordt hierdoor een optimale staat bereikt;
+- `"genetisch"`: genereert een rooster vanuit een genetische benadering:
+        1. creëert eem aanvankelijke populatie valide roosters;
+        2. evalueert deze vervolgens aan de hand van strafpunten;
+        3. kiest de roosters met de beste 'genen';
+        4. creëert een mixmutatie van deze roosters;
+        5. herhaalt dit tot het n-aantal lussen.
 
 # Optioneel
 Mocht u het nodig vinden de C-programma's te hercompileren, dan kan dat in deze volgorde (`main.py` houdt automatisch rekening met het besturingssysteem).
