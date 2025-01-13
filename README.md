@@ -28,7 +28,7 @@ Voorbeeld: `python3.12 main.py --vakken ./data/vakken.csv --zalen ./data/zalen.c
 6. `--lussen` <het aantal lussen voor het algortime>.
 
 Kiest uit de volgende algoritmen: 
- - `"hillclimber"`: geneert een n-aantal rooster door willekeurige zaalsloten te wisselen, en geeft het beste rooster uit dat n-aantal terug — hillclimbing ('bergklimmen');
+ - `"hillclimber"`: geneert een n-aantal rooster door willekeurige zaalsloten te wisselen, en geeft het beste rooster uit dat n-aantal terug — hillclimbing (_'bergbeklimmen'_);
 - `"deterministisch"`: genereert een rooster door gebruik te maken van simulated annealing. Deze methode staat slechte oplossingen toe met een kans die naarmate tijd vordert afneemt. Uiteindelijk wordt hierdoor een optimale staat bereikt;
 - `"simulatedAnnealing"`: genereert een rooster door gebruik te maken van simulated annealing. Deze methode staat slechte oplossingen toe met een kans die naarmate tijd vordert afneemt. Uiteindelijk wordt hierdoor een optimale staat bereikt;
 - `"genetisch"`: genereert een rooster vanuit een genetische benadering:
