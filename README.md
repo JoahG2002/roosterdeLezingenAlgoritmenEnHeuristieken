@@ -1,4 +1,4 @@
-# **Algoritmen en Heuristieken**
+# **Algoritmen en heuristieken**
 
 Deze repository bevat een project voor het genereren en optimaliseren van een rooster voor onderwijsactiviteiten. Het project maakt gebruik van verschillende algoritmen en heuristieken om tot een optimale oplossing te komen. 
 
