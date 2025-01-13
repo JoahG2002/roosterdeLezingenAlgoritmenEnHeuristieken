@@ -29,12 +29,12 @@ Voorbeeld: `python3.12 main.py --vakken ./data/vakken.csv --zalen ./data/zalen.c
 
 Kiest uit de volgende algoritmen: 
  - `"hillclimber"`: geneert een n-aantal rooster door willekeurige zaalsloten te wisselen, en geeft het beste rooster uit dat n-aantal terug — hillclimbing (_'bergbeklimmen'_);
-- `"deterministisch"`: genereert een rooster door gebruik te maken van simulated annealing. Deze methode staat slechte oplossingen toe met een kans die naarmate tijd vordert afneemt. Uiteindelijk wordt hierdoor een optimale staat bereikt;
-- `"simulatedAnnealing"`: genereert een rooster door gebruik te maken van simulated annealing. Deze methode staat slechte oplossingen toe met een kans die naarmate tijd vordert afneemt. Uiteindelijk wordt hierdoor een optimale staat bereikt;
+- `"deterministisch"`: genereert een gesorteerd basisrooster dat voor eenzelfde dataverzameling altijd een zelfde rooster zal genereren. 
+- `"simulatedAnnealing"`: genereert een rooster door gebruik te maken van simulated annealing. Deze methode staat slechte oplossingen toe met een kans die naarmate tijd vordert, afneemt. Uiteindelijk wordt hierdoor een optimale staat bereikt;
 - `"genetisch"`: genereert een rooster vanuit een genetische benadering:
-1. creëert eem aanvankelijke populatie valide roosters;
+1. creëert een aanvankelijke populatie valide roosters;
 2. evalueert deze vervolgens aan de hand van strafpunten;
-3. kiest de roosters met de beste 'genen';
+3. kiest hieruit de roosters met de beste 'genen';
 4. creëert een mixmutatie van deze roosters;
 5. herhaalt dit tot het n-aantal lussen.
 
