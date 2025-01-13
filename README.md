@@ -32,11 +32,11 @@ Kiest uit de volgende algoritmen:
 - `"deterministisch"`: genereert een rooster door gebruik te maken van simulated annealing. Deze methode staat slechte oplossingen toe met een kans die naarmate tijd vordert afneemt. Uiteindelijk wordt hierdoor een optimale staat bereikt;
 - `"simulatedAnnealing"`: genereert een rooster door gebruik te maken van simulated annealing. Deze methode staat slechte oplossingen toe met een kans die naarmate tijd vordert afneemt. Uiteindelijk wordt hierdoor een optimale staat bereikt;
 - `"genetisch"`: genereert een rooster vanuit een genetische benadering:
-        1. creëert eem aanvankelijke populatie valide roosters;
-        2. evalueert deze vervolgens aan de hand van strafpunten;
-        3. kiest de roosters met de beste 'genen';
-        4. creëert een mixmutatie van deze roosters;
-        5. herhaalt dit tot het n-aantal lussen.
+1. creëert eem aanvankelijke populatie valide roosters;
+2. evalueert deze vervolgens aan de hand van strafpunten;
+3. kiest de roosters met de beste 'genen';
+4. creëert een mixmutatie van deze roosters;
+5. herhaalt dit tot het n-aantal lussen.
 
 # Optioneel
 Mocht u het nodig vinden de C-programma's te hercompileren, dan kan dat in deze volgorde (`main.py` houdt automatisch rekening met het besturingssysteem).
