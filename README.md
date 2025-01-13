@@ -14,7 +14,7 @@ Deze repository bevat een project voor het genereren en optimaliseren van een ro
 1. **ideaal**: `python3.12`;
 2. **installatie vereisten**: `pip install -r requirements.txt`.
 
-# Gebruik
+## Gebruik
 1. run `main.py`
 
 Voorbeeld: `python3.12 main.py --vakken ./data/vakken.csv --zalen ./data/zalen.csv --sv ./data/studenten_en_vakken.csv --resultaat ./data/roosterHillclimber.csv --prestatie ./data/prestatiesAlgoritmen.csv --lussen 500 --algoritme genetisch`
@@ -38,7 +38,7 @@ Kiest uit de volgende algoritmen:
 4. creëert een mixmutatie van deze roosters;
 5. herhaalt dit tot het n-aantal lussen.
 
-# Optioneel
+## Optioneel
 Mocht u het nodig vinden de C-programma's te hercompileren, dan kan dat in deze volgorde (`main.py` houdt automatisch rekening met het besturingssysteem).
 1. `gcc -O3 -fPIC -c reken.c -o reken.o -Wall -Werror`
 2. `gcc -O3 -shared -o reken.dll -fPIC reken.c -Wall -Werror`
