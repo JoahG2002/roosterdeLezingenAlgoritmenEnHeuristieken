@@ -2,7 +2,7 @@
 
 Deze repository bevat een project voor het genereren en optimaliseren van een rooster voor onderwijsactiviteiten. Het project maakt gebruik van verschillende algoritmen en heuristieken om tot een optimale oplossing te komen. 
 
-## Inhoud van de Repository
+## Inhoud van repository
 
 - **`requirements.txt`**: lijst van Python-pakketten die nodig zijn om het project uit te voeren;
 - **`main.py`**: het hoofdscript waarmee het rooster gegenereerd wordt;
