@@ -14,14 +14,4 @@ mogelijk: 20-46,100 strafpunten
 
 wat te doen met drie * 2 tussentijdsloten?
 
-STRAFPUNTEN_GRENS_VAKWISSELEN_NAAR_STUDENTWISSEL
-
 Histogram strafpunten per algoritmen
-
-Vakken niet ingeroosterd, niet .count(None)
-
-Studenten met veel vakken
-
-Studenten naar groepen sturen
-
-tuple[tuple[Student, Tijdslot], tuple[Student, Tijdslot]]

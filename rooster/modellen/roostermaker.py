@@ -479,24 +479,30 @@ class Roostermaker:
             studenten_huidige_lus: set[Student] = deepcopy(self.__studenten)
             vakken_huidige_lus: list[Vak] = deepcopy(list(self.__vakken))
 
-            activiteitenwissel: tuple[Activiteit, Activiteit] | None = self._geef_willekeurige_wissel(rooster_huidige_lus)
+            if laagste_aantal_strafpunten > maxima.STRAFPUNTENGRENS_VAKWISSELEN_NAAR_STUDENT:
+                activiteitenwissel: tuple[Activiteit, Activiteit] | None = self._geef_willekeurige_wissel(rooster_huidige_lus)
 
-            if not activiteitenwissel:
-                continue
+                if not activiteitenwissel:
+                    continue
 
-            activiteit1, activiteit2 = activiteitenwissel
+                activiteit1, activiteit2 = activiteitenwissel
 
-            if not self._is_valide_zaalwissel(activiteit1, activiteit2):
-                continue
+                if not self._is_valide_zaalwissel(activiteit1, activiteit2):
+                    continue
 
-            self._verwissel_activiteiten(
-                activiteit1=activiteit1,
-                activiteit2=activiteit2,
-                zaalsloten_ingeroosterd=zaalsloten_huidige_lus,
-                rooster=rooster_huidige_lus,
-                studenten=studenten_huidige_lus,
-                vakken=vakken_huidige_lus
-            )
+                self._verwissel_activiteiten(
+                    activiteit1=activiteit1,
+                    activiteit2=activiteit2,
+                    zaalsloten_ingeroosterd=zaalsloten_huidige_lus,
+                    rooster=rooster_huidige_lus,
+                    studenten=studenten_huidige_lus,
+                    vakken=vakken_huidige_lus
+                )
+            else:
+                student1_met_tijdslot, student2_met_tijdslot = self._geef_wissel_tijdsloten_studenten(
+                    studenten_huidige_lus
+                )
+                self._wissel_tijdsloten_studenten(student1_met_tijdslot, student2_met_tijdslot)
 
             nieuw_aantal_strafpunten: int = BundelStrafpunten(studenten_huidige_lus, rooster_huidige_lus).totaal()
 
@@ -562,7 +568,7 @@ class Roostermaker:
             new_vakken: list[Vak] = deepcopy(list(self.__vakken))
 
             for _ in range(int(len(new_rooster) * MUTATIETEMPO)):
-                activiteitenwissel_: tuple[Activiteit, Activiteit] | None= self._geef_willekeurige_wissel(new_rooster)
+                activiteitenwissel_: tuple[Activiteit, Activiteit] | None = self._geef_willekeurige_wissel(new_rooster)
 
                 if not activiteitenwissel_:
                     continue
@@ -649,20 +655,26 @@ class Roostermaker:
                 kindrooster_: GenetischRooster = muteer_roosters(ouderrooster1, ouderrooster2)
 
                 if random.random() < MUTATIETEMPO:
-                    activiteitenwissel: tuple[Activiteit, Activiteit] | None = self._geef_willekeurige_wissel(kindrooster_.rooster)
+                    if -beste_geschiktheid > maxima.STRAFPUNTENGRENS_VAKWISSELEN_NAAR_STUDENT:
+                        activiteitenwissel: tuple[Activiteit, Activiteit] | None = self._geef_willekeurige_wissel(kindrooster_.rooster)
 
-                    if activiteitenwissel:
-                        activiteit1, activiteit2 = activiteitenwissel
+                        if activiteitenwissel:
+                            activiteit1, activiteit2 = activiteitenwissel
 
-                        if self._is_valide_zaalwissel(activiteit1, activiteit2):
-                            self._verwissel_activiteiten(
-                                activiteit1=activiteit1,
-                                activiteit2=activiteit2,
-                                zaalsloten_ingeroosterd=kindrooster_.zaalsloten,
-                                rooster=kindrooster_.rooster,
-                                studenten=kindrooster_.studenten,
-                                vakken=kindrooster_.vakken
-                            )
+                            if self._is_valide_zaalwissel(activiteit1, activiteit2):
+                                self._verwissel_activiteiten(
+                                    activiteit1=activiteit1,
+                                    activiteit2=activiteit2,
+                                    zaalsloten_ingeroosterd=kindrooster_.zaalsloten,
+                                    rooster=kindrooster_.rooster,
+                                    studenten=kindrooster_.studenten,
+                                    vakken=kindrooster_.vakken
+                                )
+                    else:
+                        student1_met_tijdslot, student2_met_tijdslot = self._geef_wissel_tijdsloten_studenten(
+                            {student for student in kindrooster_.studenten if student.geef_aantal_ingeroosterde_vakken()}
+                        )
+                        self._wissel_tijdsloten_studenten(student1_met_tijdslot, student2_met_tijdslot)
 
                 nieuwe_populaties.append(kindrooster_)
 

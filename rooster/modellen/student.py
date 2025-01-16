@@ -206,3 +206,9 @@ class Student:
                 i += 1
 
         return strafpunten_tussentijdsloten
+
+    def geef_aantal_ingeroosterde_vakken(self) -> int:
+        """
+        Geeft het aantal ingeroosterde vakken van een student terug.
+        """
+        return self.__zaalsloten.__len__()
