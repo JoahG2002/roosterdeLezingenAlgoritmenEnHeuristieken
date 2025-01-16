@@ -1,0 +1,27 @@
+geem werlcollege op dezelfde dag, niet per se nodig
+
+deterministisch: matig, maar dan kan niet anders. 
+deterministishV2: lette op ruimtecapaciteit en sorteerde de zalen van groot naar klein, i.p.v. vice versa
+hillclimberV1: posities rooster wisselen doet niets. zaalsloten
+hillclimberV2: zaalsloten verwisselen: het werkt! 
+hillclimberShuffleVakkenZalen: vrij goed, zalen, vakken naar list -> shuffle
+simulated annealing: niet veel beter
+genetisch: traag, maar het beste 1538
+
+Een geldig weekrooster is een weekrooster waarvoor aan alle roosterbare activiteiten van ieder vak een tijdsslot met een zaal hebben. We noemen het paar tijdsslot-zaal een zaalslot.
+
+mogelijk: 20-46,100 strafpunten
+
+wat te doen met drie * 2 tussentijdsloten?
+
+STRAFPUNTEN_GRENS_VAKWISSELEN_NAAR_STUDENTWISSEL
+
+Histogram strafpunten per algoritmen
+
+Vakken niet ingeroosterd, niet .count(None)
+
+Studenten met veel vakken
+
+Studenten naar groepen sturen
+
+tuple[tuple[Student, Tijdslot], tuple[Student, Tijdslot]]

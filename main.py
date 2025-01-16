@@ -25,6 +25,9 @@ def main(argc: int, argv: list[str]) -> None:
 
     roostermaker.genereer_rooster()
 
+    if not roostermaker.is_valide_rooster:
+        schrijf_foutmelding("rooster invalide! Niet ieder vak is volledig ingeroosterd.\n")
+
     roostermaker.print_rooster()
 
     # roostermaker.print_alle_studentroosters()
