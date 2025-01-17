@@ -95,6 +95,12 @@ class Student:
 
         return len(self.__rooster) - aantal_unieke_tijdstippen_rooster
 
+    def heeft_activiteit_op_tijdslot(self, tijdslot: Tijdslot) -> bool:
+        """
+        Geeft terug of de student al een activiteit heeft op een gegeven tijdslot.
+        """
+        return any(zaalslot.tijdslot == tijdslot for zaalslot in self.__zaalsloten)
+
     @staticmethod
     def _aantal_strafpunten_tijdslot(starttijd: int, eindtijd: int) -> Literal[0, 1, 3, 1000]:
         """

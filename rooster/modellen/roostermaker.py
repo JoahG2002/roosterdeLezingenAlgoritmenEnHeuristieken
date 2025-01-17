@@ -57,8 +57,10 @@ class Roostermaker:
         )
 
         self.__aantal_ingeroosterde_tijdsloten: int = 0
-        self.__aantal_plaatsen_rooster: int = len(self.__ZALEN) * len(self.__TIJDSLOTEN)
-        self.__rooster: list[Activiteit | None] = [None] * self.__aantal_plaatsen_rooster
+
+        aantal_plaatsen_rooster: int = len(self.__ZALEN) * len(self.__TIJDSLOTEN)
+        self.__rooster: list[Activiteit | None] = [None] * aantal_plaatsen_rooster
+
         self.__zaalsloten_ingeroosterd: set[Zaalslot] = set()
 
         self.__strafpuntenbundel: BundelStrafpunten | None = None
@@ -137,12 +139,16 @@ class Roostermaker:
 
     def _genereer_basisrooster(self) -> None:
         """
-        Genereert een startpunt voor het rooster.
+        Genereert een startpunt voor het rooster door ieder vak in te roosteren en gebruikt te maken van ieder Tijdslot.
         """
         def vind_geschikt_zaalslot(vak_activiteit: Vakactiviteit) -> Optional[tuple[Zaalslot, int, int]]:
             """
             Vindt een geschikte zaal en tijdslot voor de gegeven activiteit of None als geen gevonden is.
             """
+            studenten_volgen_vakken: set[Student] = set(
+                student for student in self.__studenten if student.volgt_vak(vak_activiteit.vak.naam)
+            )
+
             index_tijdslot_index: int = self.__index_tijdsloten
             index_zaal: int = self.__index_zalen
 
@@ -150,13 +156,25 @@ class Roostermaker:
                 for j in range(len(self.__ZALEN)):
                     if index_tijdslot_index >= len(self.__TIJDSLOTEN):
                         index_tijdslot_index = 0
-
                     if index_zaal >= len(self.__ZALEN):
                         index_zaal = 0
 
-                    zaalslot: Zaalslot = Zaalslot(self.__TIJDSLOTEN[index_tijdslot_index], self.__ZALEN[index_zaal])
+                    tijdslot: Tijdslot = self.__TIJDSLOTEN[index_tijdslot_index]
+                    zaal: Zaal = self.__ZALEN[index_zaal]
+                    zaalslot: Zaalslot = Zaalslot(tijdslot, zaal)
 
-                    if not self._is_al_ingeroosterd(zaalslot) and self._kan_faciliteren(zaalslot.zaal, vak_activiteit):
+                    if self._is_al_ingeroosterd(zaalslot) or not self._kan_faciliteren(zaal, vak_activiteit):
+                        index_zaal += 1
+                        continue
+
+                    is_dubbel_ingeroosterd: bool = False
+
+                    for student in studenten_volgen_vakken:
+                        if student.heeft_activiteit_op_tijdslot(tijdslot):
+                            is_dubbel_ingeroosterd = True
+                            break
+
+                    if not is_dubbel_ingeroosterd:
                         return zaalslot, index_zaal, index_tijdslot_index
 
                     index_zaal += 1
@@ -181,46 +199,58 @@ class Roostermaker:
             if type__ == "hoorcollege":
                 for _ in range(aantal_activiteiten):
                     vakactiviteit: Vakactiviteit = Vakactiviteit(vak_, type__)
-                    geschikt_zaalslot: tuple[Zaalslot, int, int] | None = vind_geschikt_zaalslot(vakactiviteit)
 
-                    if not geschikt_zaalslot:
-                        continue
+                    for _ in range(len(self.__TIJDSLOTEN)):
+                        geschikt_zaalslot: tuple[Zaalslot, int, int] | None = vind_geschikt_zaalslot(vakactiviteit)
 
-                    zaalslot, index_nieuwe_zaal, index_tijdslot = geschikt_zaalslot
+                        if not geschikt_zaalslot:
+                            continue
 
-                    self.__index_zalen = (index_nieuwe_zaal + 1)
-                    self.__index_tijdsloten = (index_tijdslot + 1)
+                        zaalslot, index_nieuwe_zaal, index_tijdslot = geschikt_zaalslot
+                        self.__index_zalen = (index_nieuwe_zaal + 1)
+                        self.__index_tijdsloten = (index_tijdslot + 1)
 
-                    activiteit: Activiteit = Activiteit(zaalslot, vakactiviteit, vak.aantal_studenten())
-                    vak_.voegt_zaalslot_toe(zaalslot, type__)
+                        activiteit: Activiteit = Activiteit(zaalslot, vakactiviteit, vak_.aantal_studenten())
+                        vak_.voegt_zaalslot_toe(zaalslot, type__)
 
-                    self._voeg_activiteit_toe_aan_rooster(activiteit)
-                    self._voeg_activiteit_toe_aan_rooster_studenten(activiteit)
+                        self._voeg_activiteit_toe_aan_rooster(activiteit)
+                        self._voeg_activiteit_toe_aan_rooster_studenten(activiteit)
 
-                    return
+                        break
+            else:
+                groepgrootten_werkcollege: list[int] = self._verdeel_studenten_over_werkgroepen(
+                    totaalaantal_studenten=vak_.aantal_studenten(),
+                    maximumaantal_studenten_groep=aantal_studenten_per_activiteit_
+                )
 
-            groepgrootten_werkcollege: list[int] = self._verdeel_studenten_over_werkgroepen(
-                totaalaantal_studenten=vak_.aantal_studenten(),
-                maximumaantal_studenten_groep=aantal_studenten_per_activiteit_
+                for aantal_studenten_activiteit in groepgrootten_werkcollege:
+                    vakactiviteit: Vakactiviteit = Vakactiviteit(vak_, type__)
+
+                    for _ in range(len(self.__TIJDSLOTEN)):
+                        geschikt_zaalslot: tuple[Zaalslot, int, int] | None = vind_geschikt_zaalslot(vakactiviteit)
+
+                        if not geschikt_zaalslot:
+                            continue
+
+                        zaalslot, index_nieuwe_zaal, index_tijdslot = geschikt_zaalslot
+                        self.__index_zalen = (index_nieuwe_zaal + 1)
+                        self.__index_tijdsloten = (index_tijdslot + 1)
+
+                        activiteit: Activiteit = Activiteit(zaalslot, vakactiviteit, aantal_studenten_activiteit)
+                        vak_.voegt_zaalslot_toe(zaalslot, type__)
+
+                        self._voeg_activiteit_toe_aan_rooster(activiteit)
+                        self._voeg_activiteit_toe_aan_rooster_studenten(activiteit)
+
+                        break
+
+        self.__vakken = tuple(
+            sorted(
+                self.__vakken,
+                key=lambda x: (x.aantal_studenten() * (x.aantal_hoorcolleges + x.aantal_werkcolleges + x.aantal_practica)),
+                reverse=True
             )
-
-            for aantal_studenten_activiteit in groepgrootten_werkcollege:
-                vakactiviteit: Vakactiviteit = Vakactiviteit(vak_, type__)
-                geschikt_zaalslot: tuple[Zaalslot, int, int] | None = vind_geschikt_zaalslot(vakactiviteit)
-
-                if not geschikt_zaalslot:
-                    continue
-
-                zaalslot, index_nieuwe_zaal, index_tijdslot = geschikt_zaalslot
-
-                self.__index_zalen = (index_nieuwe_zaal + 1)
-                self.__index_tijdsloten = (index_tijdslot + 1)
-
-                activiteit: Activiteit = Activiteit(zaalslot, vakactiviteit, aantal_studenten_activiteit)
-                vak_.voegt_zaalslot_toe(zaalslot, type__)
-
-                self._voeg_activiteit_toe_aan_rooster(activiteit)
-                self._voeg_activiteit_toe_aan_rooster_studenten(activiteit)
+        )
 
         for vak in self.__vakken:
             activiteitaantallen_met_methoden: tuple[tuple[int, Literal["hoorcollege", "werkcollege", "practicum"], int], ...] = (
@@ -371,7 +401,7 @@ class Roostermaker:
             if tijdstippen_gaten
         }
         studenten_met_willekeurig_tijdstip: dict[Student, Tijdslot] = {
-            student: student.geef_willekeurig_tijdslot() for student in studenten
+            student: student.geef_willekeurig_tijdslot() for student in studenten if student.geef_aantal_ingeroosterde_vakken()
         }
 
         student_tijdslotparen_wissel: tuple[tuple[Student, Tijdslot], tuple[Student, Tijdslot]] = geef_twee_willekeurige_student_tijdslotparen(
@@ -672,7 +702,7 @@ class Roostermaker:
                                 )
                     else:
                         student1_met_tijdslot, student2_met_tijdslot = self._geef_wissel_tijdsloten_studenten(
-                            {student for student in kindrooster_.studenten if student.geef_aantal_ingeroosterde_vakken()}
+                            studenten=kindrooster_.studenten
                         )
                         self._wissel_tijdsloten_studenten(student1_met_tijdslot, student2_met_tijdslot)
 
