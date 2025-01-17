@@ -97,7 +97,7 @@ class Plotgegeven:
 
     def __init__(self) -> None:
         self.KOLOMNAMEN_VOOR_PLOT: Final[list[str]] = [
-            "naamAlgoritme", "dubbelIngeroosterd", "tussentijdsloten", "vakNietIngeroosterd", "avond", "overvol",
+            "naamAlgoritme", "dubbelIngeroosterd", "tussentijdsloten", "ongebruikteZaalsloten", "avond", "overvol",
             "aantalLussen", "totaal", "duurGenerenSeconden"
         ]
 
