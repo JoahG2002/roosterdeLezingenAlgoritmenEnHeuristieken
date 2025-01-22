@@ -1,0 +1,9 @@
+naamAlgoritme,dubbelIngeroosterd,tussentijdsloten,ongebruikteZaalsloten,avond,overvol,aantalLussen,totaal,duurGenerenSeconden
+deterministischV2,652,27429,62,85,0,1,28228,0.003
+hillclimber,151,694,134,35,0,300,1049,9.876227379
+hillclimber,21,168,134,35,0,30000,393,716.4925361
+simulatedAnnealing,293,364,134,35,0,300,861,12.08669662
+simulatedAnnealing,51,508,134,35,0,1300,763,45.73217869
+hillclimber,23,335,134,35,0,1300,562,38.19594574
+genetisch,197,293,134,5,0,1300,634,3782.378698
+hillclimber,61,775,134,35,0,100000,1040,2296.688045
